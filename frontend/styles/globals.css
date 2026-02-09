@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  color: #2d3748;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9F7AEA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6B46C1;
+}
+
+/* Message bubbles */
+.message-bubble-sent {
+  @apply bg-primary text-white rounded-2xl rounded-tr-none px-4 py-2 max-w-xs break-words;
+}
+
+.message-bubble-received {
+  @apply bg-gray-100 text-gray-900 rounded-2xl rounded-tl-none px-4 py-2 max-w-xs break-words;
+}
+
+/* Card hover effect */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
+}
+
+/* Smooth transitions */
+button,
+a {
+  @apply transition-all duration-200;
+}
+
+/* Focus styles */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply outline-none ring-2 ring-primary ring-offset-0;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 3px solid rgba(107, 70, 193, 0.1);
+  border-top: 3px solid #6B46C1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Subtle background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(107, 70, 193, 0.02) 10px,
+      rgba(107, 70, 193, 0.02) 20px
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Badge animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-badge {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Form styles */
+@layer components {
+  .input-primary {
+    @apply px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:ring-2 focus:ring-primary-light focus:outline-none transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2 bg-gray-200 text-gray-900 rounded-lg font-medium hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none transition-colors;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-2 text-primary hover:bg-primary-light hover:text-white rounded-lg font-medium transition-colors;
+  }
+}
+
+/* Responsive utilities */
+@screen md {
+  body {
+    background-attachment: fixed;
+  }
+}
