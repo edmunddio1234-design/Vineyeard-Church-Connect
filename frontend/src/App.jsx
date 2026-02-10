@@ -17,6 +17,32 @@ import { GalleryPage } from './pages/GalleryPage';
 import { SuggestionsPage } from './pages/SuggestionsPage';
 import { ConnectionTree } from './pages/ConnectionTree';
 
+// Normalize API member data (snake_case) to frontend format (camelCase)
+const normalizeMember = (m) => {
+  const ensureArray = (val) => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string' && val.length > 0) return val.split(',');
+    return [];
+  };
+  return {
+    ...m,
+    kids: m.has_kids ?? m.kids ?? 0,
+    retired: m.is_retired ?? m.retired ?? false,
+    maritalStatus: m.marital_status || m.maritalStatus || '',
+    spiritualGifts: ensureArray(m.spiritual_gifts || m.spiritualGifts),
+    currentGroups: ensureArray(m.current_groups || m.currentGroups),
+    desiredGroups: ensureArray(m.desired_groups || m.desiredGroups),
+    hobbies: ensureArray(m.hobbies),
+    available: ensureArray(m.available),
+    availableToHelp: ensureArray(m.available || m.availableToHelp),
+    languages: ensureArray(m.languages),
+    canDrive: m.can_drive ?? m.canDrive ?? true,
+    joined: m.joined || '2026',
+    smallGroup: m.current_groups?.[0] || m.currentGroups?.[0] || m.smallGroup || '',
+    avatar: m.avatar || (m.name ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '??'),
+  };
+};
+
 function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('home');
@@ -30,7 +56,7 @@ function App() {
       api.getMembers()
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
-            setMembers(data);
+            setMembers(data.map(normalizeMember));
           }
         })
         .catch(() => {
