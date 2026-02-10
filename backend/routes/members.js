@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 router.get('/', auth, async (req, res) => {
   try {
     const { location, available, group, search } = req.query;
-    let query = 'SELECT id, name, email, avatar, profile_image, phone, location, work, age, has_kids, is_retired, marital_status, birthday, languages, can_drive, dietary, spiritual_gifts, current_groups, desired_groups, hobbies, available, need_help_with, bio, social, joined FROM users WHERE id != $1';
+    let query = 'SELECT id, name, email, avatar, profile_image, phone, location, work, age, has_kids, is_retired, marital_status, birthday, languages, can_drive, dietary, spiritual_gifts, current_groups, desired_groups, hobbies, available, need_help_with, is_business_owner, business_name, business_description, bio, social, joined FROM users WHERE id != $1';
     const params = [req.userId];
     let paramCount = 2;
 

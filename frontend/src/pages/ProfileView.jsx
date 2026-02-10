@@ -23,6 +23,7 @@ export default function ProfileView({ member, setPage, onMessage }) {
   const hasSmallGroups = member.smallGroups && member.smallGroups.length > 0;
   const hasInterested = member.desiredGroups && member.desiredGroups.length > 0;
   const hasHobbies = member.hobbies && member.hobbies.length > 0;
+  const isBizOwner = member.isBusinessOwner || member.is_business_owner;
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -118,6 +119,32 @@ export default function ProfileView({ member, setPage, onMessage }) {
             <div style={S.card}>
               <h3 style={S.h3}>About Me</h3>
               <p style={{ color: T.text, lineHeight: '1.6' }}>{member.bio}</p>
+            </div>
+          )}
+
+          {/* Business Owner */}
+          {isBizOwner && (
+            <div
+              style={{
+                ...S.card,
+                borderLeft: '4px solid #2563EB',
+                backgroundColor: '#EFF6FF',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <Icon name="briefcase" size={20} color="#2563EB" />
+                <h3 style={{ ...S.h3, marginBottom: 0, color: '#1E40AF' }}>Business Owner</h3>
+              </div>
+              {(member.businessName || member.business_name) && (
+                <div style={{ fontSize: '16px', fontWeight: '600', color: T.textDark, marginBottom: '6px' }}>
+                  {member.businessName || member.business_name}
+                </div>
+              )}
+              {(member.businessDescription || member.business_description) && (
+                <p style={{ color: T.text, lineHeight: '1.6', fontSize: '14px' }}>
+                  {member.businessDescription || member.business_description}
+                </p>
+              )}
             </div>
           )}
 

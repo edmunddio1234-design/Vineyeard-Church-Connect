@@ -50,6 +50,9 @@ export default function ProfileEdit({ user, setUser, setPage }) {
     hobbies: safeArr(user.hobbies),
     availableToHelp: safeArr(user.availableToHelp || user.available),
     needHelpWith: safeArr(user.needHelpWith || user.need_help_with),
+    isBusinessOwner: user.isBusinessOwner || user.is_business_owner ? 'Yes' : 'No',
+    businessName: user.businessName || user.business_name || '',
+    businessDescription: user.businessDescription || user.business_description || '',
     profilePhoto: user.profilePhoto || user.profile_image || null,
   });
 
@@ -122,6 +125,9 @@ export default function ProfileEdit({ user, setUser, setPage }) {
         hobbies: form.hobbies.length > 0 ? form.hobbies : null,
         available: form.availableToHelp.length > 0 ? form.availableToHelp : null,
         need_help_with: form.needHelpWith.length > 0 ? form.needHelpWith : null,
+        is_business_owner: form.isBusinessOwner === 'Yes',
+        business_name: form.businessName || null,
+        business_description: form.businessDescription || null,
         profile_image: form.profilePhoto || null,
       };
 
@@ -381,6 +387,34 @@ export default function ProfileEdit({ user, setUser, setPage }) {
             placeholder="Can Provide Rides"
           />
         </div>
+      </div>
+
+      {/* SECTION: Business Owner */}
+      <div style={{ ...S.card, marginTop: '20px' }}>
+        <h2 style={S.h2}>Are You a Business Owner?</h2>
+        <div style={{ ...S.grid2, marginTop: '12px' }}>
+          <Select
+            options={['Yes', 'No']}
+            value={form.isBusinessOwner}
+            onChange={(e) => handleInputChange('isBusinessOwner', e.target.value)}
+            placeholder="Business Owner?"
+          />
+        </div>
+        {form.isBusinessOwner === 'Yes' && (
+          <div style={{ ...S.flexCol, gap: '16px', marginTop: '16px' }}>
+            <Input
+              placeholder="Business Name"
+              value={form.businessName}
+              onChange={(e) => handleInputChange('businessName', e.target.value)}
+            />
+            <TextArea
+              placeholder="Tell us about your business — what you offer, how church members can support you..."
+              rows={3}
+              value={form.businessDescription}
+              onChange={(e) => handleInputChange('businessDescription', e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
       {/* SECTION 2: Location & Work */}

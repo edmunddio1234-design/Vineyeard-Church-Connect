@@ -27,15 +27,27 @@ CREATE TABLE IF NOT EXISTS users (
   hobbies TEXT[] DEFAULT '{}',
   available TEXT[] DEFAULT '{}',
   need_help_with TEXT[] DEFAULT '{}',
+  is_business_owner BOOLEAN DEFAULT false,
+  business_name VARCHAR(255),
+  business_description TEXT,
   joined VARCHAR(10) DEFAULT '2026',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Add need_help_with column if table already exists (safe migration)
+-- Add columns if table already exists (safe migrations)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'need_help_with') THEN
     ALTER TABLE users ADD COLUMN need_help_with TEXT[] DEFAULT '{}';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'is_business_owner') THEN
+    ALTER TABLE users ADD COLUMN is_business_owner BOOLEAN DEFAULT false;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'business_name') THEN
+    ALTER TABLE users ADD COLUMN business_name VARCHAR(255);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'business_description') THEN
+    ALTER TABLE users ADD COLUMN business_description TEXT;
   END IF;
 END $$;
 

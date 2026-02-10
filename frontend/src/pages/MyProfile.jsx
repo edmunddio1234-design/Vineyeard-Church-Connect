@@ -13,12 +13,16 @@ export default function MyProfile({ user, setPage }) {
     hobbies: user.hobbies || [],
     availableToHelp: user.availableToHelp || user.available || [],
     needHelpWith: user.needHelpWith || user.need_help_with || [],
+    isBusinessOwner: user.isBusinessOwner || user.is_business_owner || false,
+    businessName: user.businessName || user.business_name || '',
+    businessDescription: user.businessDescription || user.business_description || '',
   };
   const isEmpty = !u.bio || u.bio.trim() === '';
   const hasSmallGroups = u.smallGroups && u.smallGroups.length > 0;
   const hasHobbies = u.hobbies && u.hobbies.length > 0;
   const hasAvailability = u.availableToHelp && u.availableToHelp.length > 0;
   const hasNeeds = u.needHelpWith && u.needHelpWith.length > 0;
+  const isBizOwner = u.isBusinessOwner;
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -99,6 +103,37 @@ export default function MyProfile({ user, setPage }) {
               <p style={{ color: T.text, lineHeight: '1.6' }}>{u.bio}</p>
             </div>
           ) : null}
+
+          {/* My Business */}
+          {isBizOwner && (
+            <div
+              style={{
+                ...S.card,
+                borderLeft: '4px solid #2563EB',
+                backgroundColor: '#EFF6FF',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <Icon name="briefcase" size={20} color="#2563EB" />
+                <h3 style={{ ...S.h3, marginBottom: 0, color: '#1E40AF' }}>Business Owner</h3>
+              </div>
+              {u.businessName && (
+                <div style={{ fontSize: '16px', fontWeight: '600', color: T.textDark, marginBottom: '6px' }}>
+                  {u.businessName}
+                </div>
+              )}
+              {u.businessDescription && (
+                <p style={{ color: T.text, lineHeight: '1.6', fontSize: '14px' }}>
+                  {u.businessDescription}
+                </p>
+              )}
+              {!u.businessName && !u.businessDescription && (
+                <p style={{ ...S.muted, fontSize: '13px' }}>
+                  Edit your profile to add your business details
+                </p>
+              )}
+            </div>
+          )}
 
           {/* My Small Groups */}
           {hasSmallGroups && (
