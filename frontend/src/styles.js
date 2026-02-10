@@ -68,16 +68,16 @@ export const S = {
     flexShrink: 0,
     letterSpacing: '0.5px',
   }),
-  flex: (g = 12) => ({
+  flex: {
     display: 'flex',
     alignItems: 'center',
-    gap: g,
-  }),
-  flexCol: (g = 12) => ({
+    gap: 12,
+  },
+  flexCol: {
     display: 'flex',
     flexDirection: 'column',
-    gap: g,
-  }),
+    gap: 12,
+  },
   h1: {
     fontSize: 32,
     fontWeight: 700,

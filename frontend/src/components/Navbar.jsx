@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '../theme';
-import { S } from '../styles';
+
 import VineyardLogo from './VineyardLogo';
 import Icon from './Icons';
 import { Avatar, Badge, Button } from './UI';
@@ -37,11 +37,11 @@ export default function Navbar({ page, setPage, user, notifications = [], onLogo
       }}
     >
       {/* Left: Logo + Text */}
-      <div style={{ ...S.flex, minWidth: '0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: '0', flexShrink: 0 }}>
         <div style={{ width: '32px', height: '32px', flexShrink: 0 }}>
-          <VineyardLogo size={32} />
+          <VineyardLogo size={32} hideText />
         </div>
-        <div style={{ marginLeft: '12px', flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }}>
           <div
             style={{
               fontSize: '11px',
@@ -51,7 +51,7 @@ export default function Navbar({ page, setPage, user, notifications = [], onLogo
               lineHeight: '1.2',
             }}
           >
-            <div>VINEYARD</div>
+            VINEYARD
           </div>
           <div
             style={{
@@ -113,7 +113,7 @@ export default function Navbar({ page, setPage, user, notifications = [], onLogo
       </div>
 
       {/* Right: Bell + Avatar + Logout */}
-      <div style={{ ...S.flex, flexShrink: 0, gap: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, gap: '16px' }}>
         {/* Bell Icon with Badge */}
         <button
           onClick={() => setPage('connections')}
@@ -141,7 +141,8 @@ export default function Navbar({ page, setPage, user, notifications = [], onLogo
         <button
           onClick={() => setPage('profile-me')}
           style={{
-            ...S.flex,
+            display: 'flex',
+            alignItems: 'center',
             background: 'none',
             border: 'none',
             cursor: 'pointer',

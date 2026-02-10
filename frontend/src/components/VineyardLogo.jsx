@@ -1,13 +1,13 @@
 import React from 'react';
 
-export default function VineyardLogo({ size = 120 }) {
+export default function VineyardLogo({ size = 120, hideText = false }) {
   return (
     <div style={{ textAlign: 'center' }}>
       <svg
         viewBox="0 0 200 180"
         width={size}
         height={size * 0.9}
-        style={{ marginBottom: '8px' }}
+        style={{ marginBottom: hideText ? '0px' : '8px' }}
       >
         <defs>
           <linearGradient id="vineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -60,20 +60,22 @@ export default function VineyardLogo({ size = 120 }) {
         <path d="M 100 100 Q 95 115 100 130 Q 105 115 100 100" fill="#374151" opacity="0.3" />
       </svg>
 
-      <div
-        style={{
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '1px',
-          color: '#374151',
-          textAlign: 'center',
-          lineHeight: '1.3',
-          marginTop: '4px',
-        }}
-      >
-        <div>VINEYARD CHURCH</div>
-        <div>OF BATON ROUGE</div>
-      </div>
+      {!hideText && (
+        <div
+          style={{
+            fontSize: '11px',
+            fontWeight: '700',
+            letterSpacing: '1px',
+            color: '#374151',
+            textAlign: 'center',
+            lineHeight: '1.3',
+            marginTop: '4px',
+          }}
+        >
+          <div>VINEYARD CHURCH</div>
+          <div>OF BATON ROUGE</div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { T } from './theme';
-import { MEMBERS } from './constants';
+// MEMBERS mock removed - all data comes from API
 import { api } from './api';
 import LoginPage from './components/LoginPage';
 import Navbar from './components/Navbar';
@@ -48,7 +48,7 @@ function App() {
   const [page, setPage] = useState('home');
   const [selMember, setSelMember] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
-  const [members, setMembers] = useState(MEMBERS);
+  const [members, setMembers] = useState([]);
 
   // Fetch real members from API when user is logged in
   useEffect(() => {

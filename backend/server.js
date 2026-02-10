@@ -58,19 +58,6 @@ const initializeDatabase = async () => {
     const initSql = fs.readFileSync(path.join(__dirname, 'db/init.sql'), 'utf8');
     await pool.query(initSql);
     console.log('Database schema initialized successfully');
-
-    // Seed database if fewer than 5 users (seed adds 8 sample members)
-    const userCount = await pool.query('SELECT COUNT(*) FROM users');
-    const count = parseInt(userCount.rows[0].count);
-    if (count < 5) {
-      console.log(`Database has only ${count} users, seeding with sample data...`);
-      // Use INSERT ... ON CONFLICT to avoid duplicates
-      const seedSql = fs.readFileSync(path.join(__dirname, 'db/seed.sql'), 'utf8');
-      await pool.query(seedSql);
-      console.log('Database seeded successfully with sample data');
-    } else {
-      console.log(`Database already has ${count} users, skipping seed`);
-    }
   } catch (error) {
     console.error('Failed to initialize database:', error);
     process.exit(1);
