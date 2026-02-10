@@ -41,6 +41,7 @@ const normalizeMember = (m) => {
     isBusinessOwner: m.is_business_owner ?? m.isBusinessOwner ?? false,
     businessName: m.business_name || m.businessName || '',
     businessDescription: m.business_description || m.businessDescription || '',
+    onPrayerTeam: m.on_prayer_team ?? m.onPrayerTeam ?? false,
     joined: m.joined || '2026',
     smallGroup: m.current_groups?.[0] || m.currentGroups?.[0] || m.smallGroup || '',
     avatar: m.avatar || (m.name ? m.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : '??'),
@@ -53,6 +54,8 @@ function App() {
   const [selMember, setSelMember] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [members, setMembers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Fetch real members from API when user is logged in
   useEffect(() => {
@@ -91,6 +94,44 @@ function App() {
     }
   }, [user]);
 
+  // Fetch notifications when user is logged in
+  useEffect(() => {
+    if (user) {
+      const fetchNotifications = () => {
+        api.getNotifications()
+          .then((data) => {
+            if (Array.isArray(data)) setNotifications(data);
+          })
+          .catch(() => {});
+        api.getUnreadCount()
+          .then((data) => {
+            if (data && typeof data.count === 'number') setUnreadCount(data.count);
+          })
+          .catch(() => {});
+      };
+      fetchNotifications();
+      // Poll every 30 seconds for new notifications
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const handleMarkAllRead = () => {
+    api.markAllNotificationsRead().then(() => {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    }).catch(() => {});
+  };
+
+  const handleMarkRead = (id) => {
+    api.markNotificationRead(id).then(() => {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }).catch(() => {});
+  };
+
   if (!user) {
     return (
       <LoginPage
@@ -121,7 +162,10 @@ function App() {
         page={page}
         setPage={setPage}
         user={user}
-        notifications={2}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAllRead={handleMarkAllRead}
+        onMarkRead={handleMarkRead}
         onLogout={() => { localStorage.removeItem('token'); setUser(null); setPage('home'); }}
       />
       {page === 'home' && (

@@ -202,4 +202,27 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify({ text }),
     }).then((r) => r.json()),
+
+  // Notifications
+  getNotifications: () =>
+    fetch(`${API_URL}/api/notifications`, {
+      headers: getHeaders(),
+    }).then((r) => r.json()),
+
+  getUnreadCount: () =>
+    fetch(`${API_URL}/api/notifications/unread-count`, {
+      headers: getHeaders(),
+    }).then((r) => r.json()),
+
+  markNotificationRead: (id) =>
+    fetch(`${API_URL}/api/notifications/${id}/read`, {
+      method: 'PUT',
+      headers: getHeaders(),
+    }).then((r) => r.json()),
+
+  markAllNotificationsRead: () =>
+    fetch(`${API_URL}/api/notifications/read-all`, {
+      method: 'PUT',
+      headers: getHeaders(),
+    }).then((r) => r.json()),
 };

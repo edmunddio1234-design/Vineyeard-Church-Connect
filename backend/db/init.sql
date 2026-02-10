@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
   is_business_owner BOOLEAN DEFAULT false,
   business_name VARCHAR(255),
   business_description TEXT,
+  on_prayer_team BOOLEAN DEFAULT false,
   joined VARCHAR(10) DEFAULT '2026',
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -48,6 +49,9 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'business_description') THEN
     ALTER TABLE users ADD COLUMN business_description TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'on_prayer_team') THEN
+    ALTER TABLE users ADD COLUMN on_prayer_team BOOLEAN DEFAULT false;
   END IF;
 END $$;
 
@@ -148,6 +152,21 @@ CREATE TABLE IF NOT EXISTS suggestion_comments (
   text TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT,
+  related_id INTEGER,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(is_read);
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_messages_from_to ON messages(from_user_id, to_user_id);

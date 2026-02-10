@@ -18,7 +18,41 @@ router.post('/', auth, async (req, res) => {
       [req.userId, anonymous || false, category, title, description]
     );
 
-    res.status(201).json(result.rows[0]);
+    const prayerRequest = result.rows[0];
+
+    // Notify all prayer team members (except the requester)
+    try {
+      const teamMembers = await pool.query(
+        'SELECT id, name, email FROM users WHERE on_prayer_team = true AND id != $1',
+        [req.userId]
+      );
+
+      if (teamMembers.rows.length > 0) {
+        const requesterName = anonymous ? 'Anonymous' : (await pool.query('SELECT name FROM users WHERE id = $1', [req.userId])).rows[0]?.name || 'A member';
+        const notifTitle = 'New Prayer Request';
+        const notifMessage = `${requesterName} submitted a prayer request: "${title}"${category ? ` (${category})` : ''}`;
+
+        // Insert a notification for each prayer team member
+        const notifValues = teamMembers.rows.map((m, i) => {
+          const offset = i * 5;
+          return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
+        }).join(', ');
+
+        const notifParams = teamMembers.rows.flatMap(m => [
+          m.id, 'prayer_request', notifTitle, notifMessage, prayerRequest.id
+        ]);
+
+        await pool.query(
+          `INSERT INTO notifications (user_id, type, title, message, related_id) VALUES ${notifValues}`,
+          notifParams
+        );
+      }
+    } catch (notifError) {
+      // Don't fail the prayer request if notifications fail
+      console.error('Failed to notify prayer team:', notifError);
+    }
+
+    res.status(201).json(prayerRequest);
   } catch (error) {
     console.error('Create prayer request error:', error);
     res.status(500).json({ error: 'Server error' });

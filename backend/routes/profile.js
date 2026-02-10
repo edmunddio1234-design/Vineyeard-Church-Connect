@@ -49,6 +49,7 @@ router.put('/', auth, async (req, res) => {
       is_business_owner,
       business_name,
       business_description,
+      on_prayer_team,
       joined
     } = req.body;
 
@@ -79,8 +80,9 @@ router.put('/', auth, async (req, res) => {
         is_business_owner = COALESCE($23, is_business_owner),
         business_name = COALESCE($24, business_name),
         business_description = COALESCE($25, business_description),
-        joined = COALESCE($26, joined)
-      WHERE id = $27
+        on_prayer_team = COALESCE($26, on_prayer_team),
+        joined = COALESCE($27, joined)
+      WHERE id = $28
       RETURNING *`,
       [
         name,
@@ -108,6 +110,7 @@ router.put('/', auth, async (req, res) => {
         is_business_owner,
         business_name,
         business_description,
+        on_prayer_team,
         joined,
         req.userId
       ]

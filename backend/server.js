@@ -28,6 +28,7 @@ const jobsRoutes = require('./routes/jobs');
 const prayerRoutes = require('./routes/prayer');
 const galleryRoutes = require('./routes/gallery');
 const suggestionsRoutes = require('./routes/suggestions');
+const notificationsRoutes = require('./routes/notifications');
 
 app.get('/', (req, res) => {
   res.json({ message: 'VineyardConnect Backend is running!' });
@@ -42,6 +43,7 @@ app.use('/api/jobs', jobsRoutes);
 app.use('/api/prayer', prayerRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);

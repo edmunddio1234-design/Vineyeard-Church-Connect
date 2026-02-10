@@ -148,6 +148,55 @@ export default function PrayerRequestPage({ members }) {
         </Button>
       </div>
 
+      {/* Prayer Team Info Banner */}
+      {(() => {
+        const teamCount = Array.isArray(members)
+          ? members.filter(m => m.on_prayer_team || m.onPrayerTeam).length
+          : 0;
+        return (
+          <div
+            style={{
+              ...S.card,
+              background: 'linear-gradient(135deg, #7C3AED, #9333EA)',
+              color: '#fff',
+              border: 'none',
+              padding: '16px 24px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '24px' }}>💜</span>
+              <div>
+                <div style={{ fontWeight: '600', fontSize: '15px' }}>
+                  {teamCount > 0
+                    ? `${teamCount} Prayer Team member${teamCount === 1 ? '' : 's'} will be notified`
+                    : 'Prayer Team notifications are active'}
+                </div>
+                <div style={{ fontSize: '13px', opacity: 0.9, marginTop: '4px' }}>
+                  When you submit a prayer request, our prayer team receives a notification to pray for you.
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '12px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                cursor: 'default',
+              }}
+            >
+              Join via Profile Settings
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Prayer Form */}
       {showForm && (
         <div

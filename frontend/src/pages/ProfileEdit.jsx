@@ -50,6 +50,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
     hobbies: safeArr(user.hobbies),
     availableToHelp: safeArr(user.availableToHelp || user.available),
     needHelpWith: safeArr(user.needHelpWith || user.need_help_with),
+    onPrayerTeam: user.onPrayerTeam || user.on_prayer_team ? 'Yes' : 'No',
     isBusinessOwner: user.isBusinessOwner || user.is_business_owner ? 'Yes' : 'No',
     businessName: user.businessName || user.business_name || '',
     businessDescription: user.businessDescription || user.business_description || '',
@@ -125,6 +126,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
         hobbies: form.hobbies.length > 0 ? form.hobbies : null,
         available: form.availableToHelp.length > 0 ? form.availableToHelp : null,
         need_help_with: form.needHelpWith.length > 0 ? form.needHelpWith : null,
+        on_prayer_team: form.onPrayerTeam === 'Yes',
         is_business_owner: form.isBusinessOwner === 'Yes',
         business_name: form.businessName || null,
         business_description: form.businessDescription || null,
@@ -586,6 +588,45 @@ export default function ProfileEdit({ user, setUser, setPage }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* SECTION: Prayer Team */}
+      <div
+        style={{
+          ...S.card,
+          marginTop: '20px',
+          borderLeft: '4px solid #7C3AED',
+          backgroundColor: form.onPrayerTeam === 'Yes' ? '#F5F3FF' : T.white,
+        }}
+      >
+        <h2 style={S.h2}>Join the Prayer Team</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px', marginBottom: '12px' }}>
+          Prayer team members are notified whenever someone submits a new prayer request so they can pray right away.
+        </p>
+        <Select
+          options={['Yes', 'No']}
+          value={form.onPrayerTeam}
+          onChange={(e) => handleInputChange('onPrayerTeam', e.target.value)}
+          placeholder="Join Prayer Team?"
+        />
+        {form.onPrayerTeam === 'Yes' && (
+          <div
+            style={{
+              marginTop: '12px',
+              padding: '12px 16px',
+              backgroundColor: '#EDE9FE',
+              borderRadius: '8px',
+              fontSize: '13px',
+              color: '#5B21B6',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <Icon name="check" size={16} color="#7C3AED" />
+            You'll be notified when new prayer requests come in.
+          </div>
+        )}
       </div>
 
       {/* SECTION 8: I'm Willing to Help With */}
