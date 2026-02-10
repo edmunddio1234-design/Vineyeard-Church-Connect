@@ -1,14 +1,4 @@
--- Drop all tables and recreate fresh (clean slate)
-DROP TABLE IF EXISTS suggestion_comments CASCADE;
-DROP TABLE IF EXISTS suggestions CASCADE;
-DROP TABLE IF EXISTS gallery_comments CASCADE;
-DROP TABLE IF EXISTS gallery_posts CASCADE;
-DROP TABLE IF EXISTS prayer_responses CASCADE;
-DROP TABLE IF EXISTS prayer_requests CASCADE;
-DROP TABLE IF EXISTS jobs CASCADE;
-DROP TABLE IF EXISTS messages CASCADE;
-DROP TABLE IF EXISTS connections CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- Create tables only if they don't exist (preserves data across restarts)
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
