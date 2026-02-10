@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vineyard-connect-backend
+    env: node
+    plan: standard
+    buildCommand: npm install
+    startCommand: node server.js
+    numInstances: 1
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://vineyard_connect_user:EHP5YS5HJ5VSY0vFw5I7hYdaAdQlpIrR@dpg-d6575m7pm1nc73bni2r0-a.oregon-postgres.render.com/vineyard_connect
+      - key: JWT_SECRET
+        value: your_jwt_secret_key_change_in_production_12345678
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+    healthCheckPath: /
+    region: oregon
+    routes:
+      - type: http
+        path: /
+        destination: vineyard-connect-backend

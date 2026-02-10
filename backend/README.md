@@ -1,313 +1,223 @@
 # VineyardConnect Backend
 
-Express.js backend for VineyardConnect - A social networking app for Vineyard Church of Baton Rouge.
+A complete Express.js backend for the VineyardConnect church community application. This backend connects to PostgreSQL on Render and provides comprehensive REST APIs for member management, messaging, prayer requests, job postings, gallery, and community suggestions.
 
-## Project Structure
+## Features
 
+- User authentication with JWT tokens
+- Member profiles and discovery
+- Direct messaging between members
+- Connection requests (friend requests)
+- Job postings with categories and types
+- Prayer request management with prayer counts and responses
+- Community gallery with likes and comments
+- Community suggestions with voting system
+- Comprehensive user profile with all details
+- CORS-enabled for Vercel frontend deployment
+
+## Database Schema
+
+The backend includes 9 core tables:
+
+1. **users** - User profiles with comprehensive fields
+2. **connections** - Connection/friend requests
+3. **messages** - Direct messages between users
+4. **jobs** - Job postings
+5. **prayer_requests** - Prayer requests with anonymous support
+6. **prayer_responses** - Responses to prayer requests
+7. **gallery_posts** - Community gallery posts
+8. **gallery_comments** - Comments on gallery posts
+9. **suggestions** - Community suggestions
+10. **suggestion_comments** - Comments on suggestions
+
+## Installation
+
+### Prerequisites
+- Node.js (v16+)
+- PostgreSQL database access (Render database provided)
+
+### Setup
+
+1. Clone the repository and navigate to the backend directory:
+```bash
+cd vineyard-connect/backend
 ```
-backend/
-├── server.js                 # Main application server
-├── package.json             # Dependencies
-├── .env.example             # Environment variables template
-├── middleware/
-│   └── auth.js              # JWT authentication middleware
-└── routes/
-    ├── auth.js              # Authentication endpoints
-    ├── users.js             # User profile endpoints
-    ├── messages.js          # Messaging endpoints
-    ├── connections.js       # Connection/friendship endpoints
-    └── suggestions.js       # Suggestions/voting endpoints
-```
 
-## Setup Instructions
-
-### 1. Install Dependencies
-
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-### 2. Setup Environment Variables
-
-Copy `.env.example` to `.env` and fill in your values:
-
-```bash
-cp .env.example .env
+3. Configure environment variables (.env):
 ```
-
-Configure your `.env` file:
-
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/vineyard_connect
-JWT_SECRET=your-super-secret-key-here-change-this
-FRONTEND_URL=http://localhost:3000
+DATABASE_URL=postgresql://vineyard_connect_user:EHP5YS5HJ5VSY0vFw5I7hYdaAdQlpIrR@dpg-d6575m7pm1nc73bni2r0-a.oregon-postgres.render.com/vineyard_connect
+JWT_SECRET=your_jwt_secret_key_change_in_production_12345678
 PORT=5000
+NODE_ENV=development
 ```
 
-### 3. Setup PostgreSQL Database
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE vineyard_connect;
-```
-
-The application will automatically create all required tables on startup.
-
-### 4. Start the Server
-
-**Development mode** (with auto-reload):
-```bash
-npm run dev
-```
-
-**Production mode**:
+4. Start the server:
 ```bash
 npm start
 ```
 
-The server will start on http://localhost:5000 (or your configured PORT).
+The server will:
+- Connect to the PostgreSQL database
+- Initialize the schema if tables don't exist
+- Start listening on the specified PORT
 
 ## API Endpoints
 
 ### Authentication (`/api/auth`)
+- `POST /register` - Register new user
+- `POST /login` - Login user
 
-- **POST /register** - Create new account
-  - Body: `{ first_name, last_name, email, password }`
-  - Returns: `{ token, user }`
+### Members (`/api/members`)
+- `GET /` - List members with filters (location, available, group, search)
+- `GET /:id` - Get specific member
 
-- **POST /login** - Login to account
-  - Body: `{ email, password }`
-  - Returns: `{ token, user }`
-
-- **GET /me** - Get current user profile (requires auth)
-  - Returns: User object
-
-### Users (`/api/users`)
-
-- **GET /** - List all users with optional search (requires auth)
-  - Query: `?search=name_or_email`
-  - Returns: Array of user objects
-
-- **GET /:id** - Get user by ID (requires auth)
-  - Returns: User object
-
-- **PUT /:id** - Update own profile (requires auth)
-  - Body: `{ first_name, last_name, bio, age, has_kids, is_retired, groups[], hobbies[], profile_image }`
-  - Returns: Updated user object
+### Profile (`/api/profile`)
+- `GET /` - Get authenticated user's profile
+- `PUT /` - Update authenticated user's profile (all fields)
 
 ### Messages (`/api/messages`)
-
-- **GET /conversations** - Get list of conversations (requires auth)
-  - Returns: Array of conversation previews
-
-- **GET /:userId** - Get all messages with a user (requires auth, marks as read)
-  - Returns: Array of message objects
-
-- **POST /** - Send a message (requires auth)
-  - Body: `{ receiver_id, content }`
-  - Returns: Created message object
-
-- **GET /unread/count** - Get count of unread messages (requires auth)
-  - Returns: `{ unread_count }`
+- `POST /` - Send message
+- `GET /` - Get message conversations
+- `GET /conversation/:other_user_id` - Get conversation history
 
 ### Connections (`/api/connections`)
+- `POST /` - Send connection request
+- `PUT /:id` - Accept or decline connection request
+- `GET /` - Get all connections
+- `GET /pending/requests` - Get pending connection requests
+- `DELETE /:id` - Delete connection
 
-- **POST /request/:userId** - Send connection request (requires auth)
-  - Returns: Created connection object
+### Jobs (`/api/jobs`)
+- `POST /` - Create job posting (authenticated)
+- `GET /` - List jobs with filters (category, type, location, search)
+- `GET /:id` - Get job details
+- `PUT /:id` - Update job posting (authenticated)
+- `DELETE /:id` - Delete job posting (authenticated)
 
-- **POST /accept/:id** - Accept connection request (requires auth)
-  - Returns: Updated connection object
+### Prayer (`/api/prayer`)
+- `POST /` - Create prayer request (authenticated)
+- `GET /` - List prayer requests with filters
+- `GET /:id` - Get prayer request details
+- `PUT /:id` - Update prayer request (authenticated)
+- `POST /:id/pray` - Increment prayer count
+- `POST /:id/responses` - Add prayer response (authenticated)
+- `GET /:id/responses` - Get prayer responses
+- `DELETE /:id` - Delete prayer request (authenticated)
 
-- **POST /decline/:id** - Decline connection request (requires auth)
-  - Returns: Updated connection object
-
-- **DELETE /:id** - Remove connection (requires auth)
-  - Returns: 204 No Content
-
-- **GET /** - Get all accepted connections (requires auth)
-  - Returns: Array of connected users
-
-- **GET /pending** - Get pending connection requests (requires auth)
-  - Returns: Array of pending requests
-
-- **GET /status/:userId** - Check connection status with user (requires auth)
-  - Returns: `{ status: 'none' | 'pending_sent' | 'pending_received' | 'accepted', ... }`
+### Gallery (`/api/gallery`)
+- `POST /` - Create gallery post (authenticated)
+- `GET /` - List gallery posts with filters
+- `GET /:id` - Get gallery post
+- `PUT /:id` - Update gallery post (authenticated)
+- `DELETE /:id` - Delete gallery post (authenticated)
+- `POST /:id/like` - Like post (authenticated)
+- `POST /:id/comments` - Add comment (authenticated)
+- `GET /:id/comments` - Get post comments
 
 ### Suggestions (`/api/suggestions`)
-
-- **POST /** - Create suggestion (requires auth)
-  - Body: `{ title, description, category }`
-  - Categories: `event`, `ministry`, `outreach`, `facility`, `other`
-  - Returns: Created suggestion object
-
-- **GET /** - List all suggestions (requires auth)
-  - Query: `?category=event`
-  - Returns: Array of suggestions with vote counts
-
-- **GET /:id** - Get single suggestion (requires auth)
-  - Returns: Suggestion object with vote details
-
-- **POST /:id/vote** - Toggle vote on suggestion (requires auth)
-  - Returns: `{ voted: true/false }`
-
-- **PUT /:id** - Update suggestion (requires auth, creator only)
-  - Body: `{ title, description, category, status }`
-  - Status: `open`, `in_review`, `approved`, `completed`
-  - Returns: Updated suggestion object
-
-- **DELETE /:id** - Delete suggestion (requires auth, creator only)
-  - Returns: 204 No Content
-
-## Database Schema
-
-### Users Table
-```sql
-- id (SERIAL PRIMARY KEY)
-- first_name VARCHAR(100)
-- last_name VARCHAR(100)
-- email VARCHAR(255) UNIQUE
-- password_hash VARCHAR(255)
-- bio TEXT
-- age INTEGER
-- has_kids BOOLEAN DEFAULT false
-- is_retired BOOLEAN DEFAULT false
-- groups TEXT[]
-- hobbies TEXT[]
-- profile_image TEXT
-- role VARCHAR(50) DEFAULT 'member'
-- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-```
-
-### Messages Table
-```sql
-- id (SERIAL PRIMARY KEY)
-- sender_id INTEGER FK users
-- receiver_id INTEGER FK users
-- content TEXT
-- read BOOLEAN DEFAULT false
-- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-```
-
-### Connections Table
-```sql
-- id (SERIAL PRIMARY KEY)
-- requester_id INTEGER FK users
-- receiver_id INTEGER FK users
-- status VARCHAR(50) DEFAULT 'pending' (pending, accepted, declined)
-- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-- UNIQUE(requester_id, receiver_id)
-```
-
-### Suggestions Table
-```sql
-- id (SERIAL PRIMARY KEY)
-- user_id INTEGER FK users
-- title VARCHAR(255)
-- description TEXT
-- category VARCHAR(50)
-- status VARCHAR(50) DEFAULT 'open'
-- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-```
-
-### Suggestion Votes Table
-```sql
-- id (SERIAL PRIMARY KEY)
-- suggestion_id INTEGER FK suggestions
-- user_id INTEGER FK users
-- UNIQUE(suggestion_id, user_id)
-```
+- `POST /` - Create suggestion (authenticated)
+- `GET /` - List suggestions with filters and sorting
+- `GET /:id` - Get suggestion details
+- `PUT /:id` - Update suggestion (authenticated)
+- `DELETE /:id` - Delete suggestion (authenticated)
+- `POST /:id/vote` - Vote for suggestion (authenticated)
+- `POST /:id/comments` - Add comment (authenticated)
+- `GET /:id/comments` - Get suggestion comments
 
 ## Authentication
 
-All endpoints except `/api/auth/register` and `/api/auth/login` require a valid JWT token passed in the Authorization header:
+All authenticated endpoints require a JWT token in the Authorization header:
 
 ```
 Authorization: Bearer <token>
 ```
 
-Tokens expire after 24 hours.
+Tokens are issued on successful login/registration and expire in 7 days.
+
+## Seed Data
+
+The database comes with 8 pre-seeded members:
+1. Sarah Johnson - Zachary, Elementary School Teacher
+2. Marcus Williams - Baton Rouge Mid City, Software Engineer
+3. Emily Chen - Baton Rouge Southdowns, Registered Nurse
+4. David Martinez - Central, Contractor
+5. Rachel Martinez - Central, Accountant
+6. Grace Thompson - Baton Rouge Broadmoor, Retired Principal
+7. Jason Park - Baton Rouge Sherwood Forest, Physical Therapist
+8. Lisa Okafor - Baton Rouge Garden District, Graphic Designer
+
+Plus sample jobs, prayer requests, gallery posts, and suggestions.
+
+## Deployment to Render
+
+1. Push code to GitHub
+2. Connect GitHub repository to Render
+3. Render will use `render.yaml` for deployment configuration
+4. Environment variables are set in Render dashboard
+5. Server will automatically deploy on push
 
 ## Error Handling
 
-The API returns standardized error responses:
-
-```json
-{
-  "error": "Error message",
-  "errors": [
-    {
-      "param": "field_name",
-      "msg": "Field-specific error message"
-    }
-  ]
-}
-```
-
-Common status codes:
-- 200 - Success
-- 201 - Created
-- 204 - No Content
-- 400 - Bad Request (validation errors)
-- 401 - Unauthorized
-- 403 - Forbidden
-- 404 - Not Found
-- 500 - Server Error
+All endpoints return appropriate HTTP status codes:
+- 200 OK - Success
+- 201 Created - Resource created
+- 400 Bad Request - Invalid request
+- 401 Unauthorized - Missing/invalid token
+- 403 Forbidden - Access denied
+- 404 Not Found - Resource not found
+- 409 Conflict - Duplicate resource
+- 500 Server Error - Internal error
 
 ## Security Features
 
-- **Helmet.js** - HTTP headers security
-- **CORS** - Cross-origin requests limited to FRONTEND_URL
-- **Rate Limiting** - 100 requests per 15 minutes
-- **Password Hashing** - bcryptjs with 10 rounds
-- **JWT Authentication** - Secure token-based auth
-- **SQL Injection Prevention** - Parameterized queries
-- **Input Validation** - express-validator on all inputs
+- Password hashing with bcryptjs
+- JWT authentication tokens
+- SQL injection protection (parameterized queries)
+- CORS configuration for frontend domains
+- Authorization checks on user-owned resources
 
-## Development Notes
+## File Structure
 
-- Database tables are created automatically on server startup
-- All passwords are hashed and never stored in plain text
-- Connection requests prevent duplicate entries
-- Users can only modify their own profiles
-- Suggestion creators can only modify/delete their own suggestions
-- Messages are marked as read when retrieved
-- Vote toggling allows users to add or remove votes with same endpoint
+```
+backend/
+├── db/
+│   ├── index.js          # Database pool connection
+│   ├── init.sql          # Database schema
+│   └── seed.sql          # Seed data
+├── middleware/
+│   └── auth.js           # JWT authentication middleware
+├── routes/
+│   ├── auth.js           # Authentication routes
+│   ├── members.js        # Member routes
+│   ├── profile.js        # Profile routes
+│   ├── messages.js       # Messaging routes
+│   ├── connections.js    # Connection routes
+│   ├── jobs.js           # Job routes
+│   ├── prayer.js         # Prayer request routes
+│   ├── gallery.js        # Gallery routes
+│   └── suggestions.js    # Suggestion routes
+├── server.js             # Main server file
+├── package.json          # Dependencies
+├── .env                  # Environment variables
+├── .gitignore            # Git ignore rules
+├── render.yaml           # Render deployment config
+└── README.md             # This file
+```
 
-## Troubleshooting
+## Development
 
-### Database Connection Error
-- Verify DATABASE_URL is correct
-- Check PostgreSQL is running
-- Ensure database exists
-- Check credentials are correct
+For local development, use:
+```bash
+npm run dev
+```
 
-### JWT Token Issues
-- Verify JWT_SECRET is set in .env
-- Check token hasn't expired (24 hour expiration)
-- Ensure token format is `Authorization: Bearer <token>`
-
-### CORS Errors
-- Verify FRONTEND_URL matches your frontend URL
-- Check that frontend is calling with correct origin
-
-### Rate Limiting
-- Default limit is 100 requests per 15 minutes
-- This applies globally, adjust in server.js if needed
-
-## Production Deployment
-
-Before deploying to production:
-
-1. Set strong JWT_SECRET
-2. Use environment-specific DATABASE_URL
-3. Set FRONTEND_URL to production frontend domain
-4. Enable HTTPS
-5. Consider adjusting rate limits based on traffic
-6. Set up database backups
-7. Monitor server logs
-8. Consider using a reverse proxy (nginx)
+This will start the server with hot-reload capabilities (if you have nodemon installed).
 
 ## License
 
-ISC
+MIT
