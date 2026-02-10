@@ -1,3 +1,15 @@
+-- Drop existing tables to rebuild schema cleanly
+DROP TABLE IF EXISTS suggestion_comments CASCADE;
+DROP TABLE IF EXISTS suggestions CASCADE;
+DROP TABLE IF EXISTS gallery_comments CASCADE;
+DROP TABLE IF EXISTS gallery_posts CASCADE;
+DROP TABLE IF EXISTS prayer_responses CASCADE;
+DROP TABLE IF EXISTS prayer_requests CASCADE;
+DROP TABLE IF EXISTS jobs CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS connections CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,

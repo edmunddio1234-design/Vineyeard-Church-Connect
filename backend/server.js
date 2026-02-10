@@ -8,11 +8,10 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://localhost:5173',
     'http://localhost:5000',
-    'https://localhost:3000',
-    'https://localhost:5000',
-    'https://vineyard-connect.vercel.app',
-    'https://*.vercel.app'
+    'https://vineyeard-church-connect.vercel.app',
+    /\.vercel\.app$/
   ],
   credentials: true
 }));
