@@ -7,28 +7,57 @@ export function ConnectionTree({ members = [] }) {
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
 
-  // Default connections for demo if no members provided
-  const defaultConnections = [
-    { from: 1, to: 2 },
-    { from: 1, to: 3 },
-    { from: 1, to: 5 },
-    { from: 2, to: 4 },
-    { from: 2, to: 6 },
-    { from: 3, to: 7 },
-    { from: 4, to: 5 },
-    { from: 4, to: 8 },
-    { from: 5, to: 8 },
-    { from: 6, to: 7 },
-    { from: 3, to: 4 },
-    { from: 1, to: 8 },
-    { from: 6, to: 2 },
-    { from: 7, to: 8 },
-    { from: 5, to: 3 },
-  ];
+  // Use real members if available, otherwise use demo data
+  const realMembers = Array.isArray(members) && members.length > 0;
+  const nodeMembers = realMembers
+    ? members.filter(m => m.id)
+    : [
+        { id: 1, name: 'John Smith', location: 'Baton Rouge', currentGroups: ['Men\'s Fellowship'] },
+        { id: 2, name: 'Maria Garcia', location: 'Baton Rouge', currentGroups: ['Women of Faith'] },
+        { id: 3, name: 'David Johnson', location: 'Baton Rouge', currentGroups: ['Men\'s Fellowship', 'Couples Connect'] },
+        { id: 4, name: 'Sarah Williams', location: 'Baton Rouge', currentGroups: ['Women of Faith', 'Prayer Warriors'] },
+        { id: 5, name: 'Robert Brown', location: 'Baton Rouge', currentGroups: ['Couples Connect'] },
+        { id: 6, name: 'Elizabeth Lee', location: 'Baton Rouge', currentGroups: ['Young Adults'] },
+        { id: 7, name: 'James Davis', location: 'Baton Rouge', currentGroups: ['Young Adults', 'Worship Team'] },
+        { id: 8, name: 'Jessica Miller', location: 'Baton Rouge', currentGroups: ['Worship Team', 'Prayer Warriors'] },
+      ];
 
-  const connections = Array.isArray(members) && members.length > 0
-    ? members.filter(m => m.from && m.to)
-    : defaultConnections;
+  // Auto-generate connections based on shared groups, location, or hobbies
+  const generateConnections = () => {
+    const conns = [];
+    const seen = new Set();
+    for (let i = 0; i < nodeMembers.length; i++) {
+      for (let j = i + 1; j < nodeMembers.length; j++) {
+        const a = nodeMembers[i];
+        const b = nodeMembers[j];
+        const aGroups = a.currentGroups || a.current_groups || [];
+        const bGroups = b.currentGroups || b.current_groups || [];
+        const sharedGroups = aGroups.filter(g => bGroups.includes(g));
+        const aHobbies = a.hobbies || [];
+        const bHobbies = b.hobbies || [];
+        const sharedHobbies = aHobbies.filter(h => bHobbies.includes(h));
+        const sameLocation = a.location && b.location && a.location === b.location;
+
+        if (sharedGroups.length > 0 || sharedHobbies.length >= 2 || (sameLocation && (sharedHobbies.length > 0 || sharedGroups.length > 0))) {
+          const key = `${a.id}-${b.id}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            conns.push({ from: a.id, to: b.id, reason: sharedGroups.join(', ') || sharedHobbies.join(', ') || a.location });
+          }
+        }
+      }
+    }
+    // If no natural connections, create some based on proximity in the list
+    if (conns.length === 0 && nodeMembers.length > 1) {
+      for (let i = 0; i < nodeMembers.length; i++) {
+        const next = (i + 1) % nodeMembers.length;
+        conns.push({ from: nodeMembers[i].id, to: nodeMembers[next].id });
+      }
+    }
+    return conns;
+  };
+
+  const connections = generateConnections();
 
   // Helper: Get all connections for a member
   const getMemberConns = (id) => {
@@ -50,36 +79,19 @@ export function ConnectionTree({ members = [] }) {
   const centerY = svgHeight / 2;
   const radius = 240;
 
-  // Get member count from members array
-  const memberCount = Array.isArray(members) && members.length > 0
-    ? members.filter(m => m.id).length
-    : 8; // Default to 8 for demo
+  const memberCount = nodeMembers.length;
 
   const getNodePosition = (index) => {
-    const angle = (2 * Math.PI * index / memberCount) - Math.PI / 2;
+    const angle = (2 * Math.PI * index / Math.max(memberCount, 1)) - Math.PI / 2;
     return {
       x: centerX + radius * Math.cos(angle),
       y: centerY + radius * Math.sin(angle),
     };
   };
 
-  // Get member by index or use default demo members
+  // Get member by index
   const getMember = (index) => {
-    if (Array.isArray(members) && members.length > index) {
-      return members[index];
-    }
-    // Default demo members
-    const demoMembers = [
-      { id: 1, name: 'John Smith', location: 'Baton Rouge' },
-      { id: 2, name: 'Maria Garcia', location: 'Baton Rouge' },
-      { id: 3, name: 'David Johnson', location: 'Baton Rouge' },
-      { id: 4, name: 'Sarah Williams', location: 'Baton Rouge' },
-      { id: 5, name: 'Robert Brown', location: 'Baton Rouge' },
-      { id: 6, name: 'Elizabeth Lee', location: 'Baton Rouge' },
-      { id: 7, name: 'James Davis', location: 'Baton Rouge' },
-      { id: 8, name: 'Jessica Miller', location: 'Baton Rouge' },
-    ];
-    return demoMembers[index] || { id: index + 1, name: `Member ${index + 1}`, location: 'Baton Rouge' };
+    return nodeMembers[index] || { id: index + 1, name: `Member ${index + 1}`, location: 'Baton Rouge' };
   };
 
   // Get first name from full name
@@ -142,8 +154,11 @@ export function ConnectionTree({ members = [] }) {
 
             {/* Connection Lines */}
             {connections.map((conn, idx) => {
-              const fromPos = getNodePosition(conn.from - 1);
-              const toPos = getNodePosition(conn.to - 1);
+              const fromIdx = nodeMembers.findIndex(m => m.id === conn.from);
+              const toIdx = nodeMembers.findIndex(m => m.id === conn.to);
+              if (fromIdx === -1 || toIdx === -1) return null;
+              const fromPos = getNodePosition(fromIdx);
+              const toPos = getNodePosition(toIdx);
               const isActive = selected && (isConnected(conn.from) || isConnected(conn.to));
               const isLineActive = selected && (
                 (conn.from === selected || conn.to === selected)
@@ -179,9 +194,8 @@ export function ConnectionTree({ members = [] }) {
             })}
 
             {/* Member Nodes */}
-            {Array.from({ length: memberCount }).map((_, idx) => {
-              const memberId = idx + 1;
-              const member = getMember(idx);
+            {nodeMembers.map((member, idx) => {
+              const memberId = member.id;
               const pos = getNodePosition(idx);
               const isSelected = selected === memberId;
               const isConnectedToSelected = selected && isConnected(memberId);
@@ -340,41 +354,31 @@ export function ConnectionTree({ members = [] }) {
               </div>
 
               {/* Most Connected Member */}
-              {memberCount > 0 && (
-                <div
-                  style={{
-                    backgroundColor: T.primaryFaint,
-                    borderRadius: '10px',
-                    padding: '10px 14px',
-                  }}
-                >
-                  <div style={{ fontSize: '12px', color: T.textMuted, marginBottom: '4px' }}>
-                    Most Connected
+              {memberCount > 0 && (() => {
+                const mostConnected = nodeMembers.reduce((max, m, idx) => {
+                  const conns = getMemberConns(m.id);
+                  return conns.length > (max.count || 0)
+                    ? { id: m.id, count: conns.length, name: m.name }
+                    : max;
+                }, { count: 0 });
+                if (!mostConnected.name) return null;
+                return (
+                  <div
+                    style={{
+                      backgroundColor: T.primaryFaint,
+                      borderRadius: '10px',
+                      padding: '10px 14px',
+                    }}
+                  >
+                    <div style={{ fontSize: '12px', color: T.textMuted, marginBottom: '4px' }}>
+                      Most Connected
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: '700', color: T.primaryDark }}>
+                      {mostConnected.name} ({mostConnected.count})
+                    </div>
                   </div>
-                  {Array.from({ length: memberCount }).reduce((maxMember, _, idx) => {
-                    const memberId = idx + 1;
-                    const conns = getMemberConns(memberId);
-                    return conns.length > (maxMember.count || 0)
-                      ? { id: memberId, count: conns.length, name: getMember(idx).name }
-                      : maxMember;
-                  }, {}) && (() => {
-                    const mostConnected = Array.from({ length: memberCount }).reduce((maxMember, _, idx) => {
-                      const memberId = idx + 1;
-                      const conns = getMemberConns(memberId);
-                      return conns.length > (maxMember.count || 0)
-                        ? { id: memberId, count: conns.length, name: getMember(idx).name }
-                        : maxMember;
-                    }, {});
-                    return (
-                      <div>
-                        <div style={{ fontSize: '16px', fontWeight: '700', color: T.primaryDark }}>
-                          {mostConnected.name} ({mostConnected.count})
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
 
@@ -382,10 +386,10 @@ export function ConnectionTree({ members = [] }) {
           {selected && (
             <div style={S.card}>
               <div style={{ ...S.flex, marginBottom: '16px' }}>
-                <Avatar name={getMember(selected - 1).name} size={40} />
+                <Avatar name={(nodeMembers.find(m => m.id === selected) || {}).name || 'User'} size={40} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: '600', color: T.textDark }}>
-                    {getMember(selected - 1).name}
+                    {(nodeMembers.find(m => m.id === selected) || {}).name || 'Member'}
                   </div>
                   <div style={{ fontSize: '12px', color: T.textMuted }}>
                     {getMemberConns(selected).length} connections
@@ -402,7 +406,7 @@ export function ConnectionTree({ members = [] }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {getMemberConns(selected).map((conn) => {
                   const connectedId = conn.from === selected ? conn.to : conn.from;
-                  const connectedMember = getMember(connectedId - 1);
+                  const connectedMember = nodeMembers.find(m => m.id === connectedId) || { name: 'Member', location: '' };
                   return (
                     <div
                       key={`conn-sidebar-${connectedId}`}

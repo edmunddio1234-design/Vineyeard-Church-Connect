@@ -5,10 +5,18 @@ import { Avatar, Tag, Button } from '../components/UI';
 import Icon from '../components/Icons';
 
 export default function MyProfile({ user, setPage }) {
-  const isEmpty = !user.bio || user.bio.trim() === '';
-  const hasSmallGroups = user.smallGroups && user.smallGroups.length > 0;
-  const hasHobbies = user.hobbies && user.hobbies.length > 0;
-  const hasAvailability = user.availableToHelp && user.availableToHelp.length > 0;
+  // Normalize field names (API returns name, frontend uses fullName)
+  const u = {
+    ...user,
+    fullName: user.fullName || user.name || 'User',
+    smallGroups: user.smallGroups || user.currentGroups || [],
+    hobbies: user.hobbies || [],
+    availableToHelp: user.availableToHelp || user.available || [],
+  };
+  const isEmpty = !u.bio || u.bio.trim() === '';
+  const hasSmallGroups = u.smallGroups && u.smallGroups.length > 0;
+  const hasHobbies = u.hobbies && u.hobbies.length > 0;
+  const hasAvailability = u.availableToHelp && u.availableToHelp.length > 0;
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -22,7 +30,7 @@ export default function MyProfile({ user, setPage }) {
         }}
       >
         <h1 style={S.h1}>My Profile</h1>
-        <Button variant="primary" onClick={() => setPage('profileedit')}>
+        <Button variant="primary" onClick={() => setPage('profile-edit')}>
           Edit Profile
         </Button>
       </div>
@@ -47,10 +55,10 @@ export default function MyProfile({ user, setPage }) {
         {/* Content Area */}
         <div style={{ padding: '0 32px 32px', marginTop: '-50px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
-            {user.profilePhoto ? (
+            {u.profilePhoto ? (
               <img
-                src={user.profilePhoto}
-                alt={user.fullName}
+                src={u.profilePhoto}
+                alt={u.fullName}
                 style={{
                   width: '96px',
                   height: '96px',
@@ -60,17 +68,17 @@ export default function MyProfile({ user, setPage }) {
                 }}
               />
             ) : (
-              <Avatar name={user.fullName || 'User'} size={96} />
+              <Avatar name={u.fullName || 'User'} size={96} />
             )}
             <div>
-              <h2 style={{ ...S.h2, marginBottom: '8px' }}>{user.fullName || 'My Profile'}</h2>
-              {user.work && (
-                <div style={{ ...S.muted, marginBottom: '4px' }}>{user.work}</div>
+              <h2 style={{ ...S.h2, marginBottom: '8px' }}>{u.fullName || 'My Profile'}</h2>
+              {u.work && (
+                <div style={{ ...S.muted, marginBottom: '4px' }}>{u.work}</div>
               )}
-              {user.location && (
+              {u.location && (
                 <div style={{ ...S.muted, display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Icon name="location" size={14} />
-                  {user.location}
+                  {u.location}
                 </div>
               )}
             </div>
@@ -86,7 +94,7 @@ export default function MyProfile({ user, setPage }) {
           {!isEmpty ? (
             <div style={S.card}>
               <h3 style={S.h3}>About Me</h3>
-              <p style={{ color: T.text, lineHeight: '1.6' }}>{user.bio}</p>
+              <p style={{ color: T.text, lineHeight: '1.6' }}>{u.bio}</p>
             </div>
           ) : null}
 
@@ -95,7 +103,7 @@ export default function MyProfile({ user, setPage }) {
             <div style={S.card}>
               <h3 style={S.h3}>My Small Groups</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {user.smallGroups.map((group) => (
+                {u.smallGroups.map((group) => (
                   <Tag key={group} variant="success">
                     {group}
                   </Tag>
@@ -109,7 +117,7 @@ export default function MyProfile({ user, setPage }) {
             <div style={S.card}>
               <h3 style={S.h3}>My Hobbies</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {user.hobbies.map((hobby) => (
+                {u.hobbies.map((hobby) => (
                   <Tag key={hobby} variant="success">
                     {hobby}
                   </Tag>
@@ -132,7 +140,7 @@ export default function MyProfile({ user, setPage }) {
             >
               <h3 style={S.h3}>I Can Help With</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {user.availableToHelp.map((item) => (
+                {u.availableToHelp.map((item) => (
                   <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Icon name="check" size={18} color={T.success} />
                     <span style={{ color: T.text }}>{item}</span>
@@ -167,7 +175,7 @@ export default function MyProfile({ user, setPage }) {
           <p style={{ ...S.muted, marginTop: '8px', marginBottom: '20px' }}>
             Complete your profile to help others learn about you
           </p>
-          <Button variant="primary" onClick={() => setPage('profileedit')}>
+          <Button variant="primary" onClick={() => setPage('profile-edit')}>
             Complete My Profile
           </Button>
         </div>

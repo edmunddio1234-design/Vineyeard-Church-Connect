@@ -1,128 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { T } from '../theme';
 import { S } from '../styles';
 import { Avatar, Button, Input, TextArea, Select } from '../components/UI';
 import { GALLERY_CATS } from '../constants';
 
 export function GalleryPage({ members }) {
+  const fileInputRef = useRef(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [uploadData, setUploadData] = useState({
     caption: '',
     category: GALLERY_CATS[0],
     type: 'photo',
+    imageData: null,
+    imageName: '',
   });
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [postComments, setPostComments] = useState({});
   const [newCommentText, setNewCommentText] = useState({});
 
-  const initialPosts = [
-    {
-      id: 1,
-      author: 'Sarah',
-      category: 'Worship Service',
-      emoji: '🎶',
-      caption: 'Sunday worship at Vineyard Church of Baton Rouge',
-      likes: 24,
-      color: '#E5E7EB',
-      type: 'photo',
-      date: '2 days ago',
-    },
-    {
-      id: 2,
-      author: 'David & Rachel',
-      category: 'Family Events',
-      emoji: '⛺️',
-      caption: 'Family camping Tickfaw - what an amazing weekend!',
-      likes: 31,
-      color: '#D1D5DB',
-      type: 'photo',
-      date: '5 days ago',
-    },
-    {
-      id: 3,
-      author: 'Marcus',
-      category: 'Family Events',
-      emoji: '🏀',
-      caption: 'Basketball at BREC with the youth group',
-      likes: 18,
-      color: '#F3F4F6',
-      type: 'photo',
-      date: '1 week ago',
-    },
-    {
-      id: 4,
-      author: 'Lisa',
-      category: 'Church Events',
-      emoji: '🎨',
-      caption: 'Church bulletin design for this Sunday',
-      likes: 15,
-      color: '#E8EAED',
-      type: 'photo',
-      date: '1 week ago',
-    },
-    {
-      id: 5,
-      author: 'Grace',
-      category: 'Small Groups',
-      emoji: '🎄',
-      caption: 'Women of Faith Christmas celebration',
-      likes: 27,
-      color: '#D6D9DE',
-      type: 'photo',
-      date: '2 weeks ago',
-    },
-    {
-      id: 6,
-      author: 'Jason',
-      category: 'Worship Service',
-      emoji: '🌅',
-      caption: 'Sunrise worship service at the levee',
-      likes: 33,
-      color: '#ECEEF1',
-      type: 'photo',
-      date: '2 weeks ago',
-    },
-    {
-      id: 7,
-      author: 'Emily',
-      category: 'Community Service',
-      emoji: '🩺',
-      caption: 'Community health fair - serving Baton Rouge',
-      likes: 42,
-      color: '#DFE1E5',
-      type: 'photo',
-      date: '3 weeks ago',
-    },
-    {
-      id: 8,
-      author: 'Tom & Linda',
-      category: 'Youth Ministry',
-      emoji: '📦',
-      caption: 'Youth food bank volunteer day',
-      likes: 29,
-      color: '#F0F1F3',
-      type: 'photo',
-      date: '3 weeks ago',
-    },
-    {
-      id: 9,
-      author: 'Marcus',
-      category: 'Church Events',
-      emoji: '🎥',
-      caption: 'Tech workshop for seniors - learning together',
-      likes: 20,
-      color: '#E2E4E8',
-      type: 'video',
-      date: '1 month ago',
-    },
-  ];
-
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState([]);
 
   const filteredPosts = selectedCategory === 'All'
     ? posts
     : posts.filter(p => p.category === selectedCategory);
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadData(prev => ({
+          ...prev,
+          imageData: reader.result,
+          imageName: file.name,
+          type: file.type.startsWith('video') ? 'video' : 'photo',
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleUpload = () => {
     if (!uploadData.caption.trim()) {
@@ -133,7 +50,8 @@ export function GalleryPage({ members }) {
       id: posts.length + 1,
       author: 'You',
       category: uploadData.category,
-      emoji: '✨',
+      emoji: uploadData.imageData ? null : '✨',
+      imageData: uploadData.imageData || null,
       caption: uploadData.caption,
       likes: 0,
       color: '#E5E7EB',
@@ -141,8 +59,9 @@ export function GalleryPage({ members }) {
       date: 'just now',
     };
     setPosts([newPost, ...posts]);
-    setUploadData({ caption: '', category: GALLERY_CATS[0], type: 'photo' });
+    setUploadData({ caption: '', category: GALLERY_CATS[0], type: 'photo', imageData: null, imageName: '' });
     setShowUploadForm(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleLike = (postId) => {
@@ -207,9 +126,17 @@ export function GalleryPage({ members }) {
             <h3 style={S.h3}>Share Your Moment</h3>
 
             {/* Upload Zone */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
             <div
+              onClick={() => fileInputRef.current?.click()}
               style={{
-                padding: '40px',
+                padding: uploadData.imageData ? '12px' : '40px',
                 border: `2px dashed ${T.primary}`,
                 borderRadius: '12px',
                 textAlign: 'center',
@@ -221,11 +148,31 @@ export function GalleryPage({ members }) {
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = T.primaryDark; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = T.primary; }}
             >
-              <div style={{ fontSize: '36px', marginBottom: '8px' }}>📸</div>
-              <p style={{ color: T.text, fontWeight: '500', marginBottom: '4px' }}>
-                Click to upload a photo or video
-              </p>
-              <p style={{ ...S.muted }}>JPG, PNG, MP4 up to 10MB</p>
+              {uploadData.imageData ? (
+                <div>
+                  <img
+                    src={uploadData.imageData}
+                    alt="Preview"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      borderRadius: '8px',
+                      objectFit: 'contain',
+                    }}
+                  />
+                  <p style={{ ...S.muted, marginTop: '8px' }}>
+                    {uploadData.imageName} — Click to change
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: '36px', marginBottom: '8px' }}>📸</div>
+                  <p style={{ color: T.text, fontWeight: '500', marginBottom: '4px' }}>
+                    Click to upload a photo or video
+                  </p>
+                  <p style={{ ...S.muted }}>JPG, PNG, MP4 up to 10MB</p>
+                </>
+              )}
             </div>
 
             {/* Caption */}
@@ -343,11 +290,13 @@ export function GalleryPage({ members }) {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              {/* Image Placeholder */}
+              {/* Image Area */}
               <div
                 style={{
                   height: '220px',
-                  background: `linear-gradient(135deg, ${post.color}, ${post.color}cc)`,
+                  background: post.imageData
+                    ? `url(${post.imageData}) center/cover no-repeat`
+                    : `linear-gradient(135deg, ${post.color}, ${post.color}cc)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -355,7 +304,7 @@ export function GalleryPage({ members }) {
                   position: 'relative',
                 }}
               >
-                {post.emoji}
+                {!post.imageData && post.emoji}
 
                 {/* Video Badge */}
                 {post.type === 'video' && (

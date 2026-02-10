@@ -23,28 +23,31 @@ export default function ProfileEdit({ user, setUser, setPage }) {
   const fileInputRef = useRef(null);
   const [showSaved, setShowSaved] = useState(false);
 
+  // Safely get arrays from user object (handles snake_case API fields)
+  const safeArr = (val) => Array.isArray(val) ? val : [];
+
   const [form, setForm] = useState({
-    fullName: user.fullName || '',
+    fullName: user.fullName || user.name || '',
     email: user.email || '',
     phone: user.phone || '',
     age: user.age || '',
     birthday: user.birthday || '',
-    maritalStatus: user.maritalStatus || '',
-    kids: user.kids || '',
-    retired: user.retired || 'No',
-    canDrive: user.canDrive || 'No',
+    maritalStatus: user.maritalStatus || user.marital_status || '',
+    kids: user.kids ?? user.has_kids ?? '',
+    retired: user.retired || user.is_retired ? 'Yes' : 'No',
+    canDrive: user.canDrive ?? user.can_drive ? 'Yes' : 'No',
     location: user.location || '',
     work: user.work || '',
     dietary: user.dietary || '',
-    languages: user.languages || [],
+    languages: safeArr(user.languages),
     bio: user.bio || '',
-    socialInterests: user.socialInterests || '',
-    smallGroups: user.smallGroups || [],
-    desiredGroups: user.desiredGroups || [],
-    spiritualGifts: user.spiritualGifts || [],
-    hobbies: user.hobbies || [],
-    availableToHelp: user.availableToHelp || [],
-    profilePhoto: user.profilePhoto || null,
+    socialInterests: user.socialInterests || user.social || '',
+    smallGroups: safeArr(user.smallGroups || user.currentGroups || user.current_groups),
+    desiredGroups: safeArr(user.desiredGroups || user.desired_groups),
+    spiritualGifts: safeArr(user.spiritualGifts || user.spiritual_gifts),
+    hobbies: safeArr(user.hobbies),
+    availableToHelp: safeArr(user.availableToHelp || user.available),
+    profilePhoto: user.profilePhoto || user.profile_image || null,
   });
 
   const handleInputChange = (field, value) => {
@@ -90,9 +93,17 @@ export default function ProfileEdit({ user, setUser, setPage }) {
   };
 
   const handleSave = () => {
-    setUser(form);
+    // Merge form data back to user, keeping the original id/email/token
+    setUser((prev) => ({
+      ...prev,
+      ...form,
+      name: form.fullName, // Sync name field for navbar/avatar
+    }));
     setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2500);
+    setTimeout(() => {
+      setShowSaved(false);
+      setPage('profile-me');
+    }, 1500);
   };
 
   const getInitials = (name) => {
@@ -113,7 +124,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
           <p style={{ ...S.muted, marginTop: '4px' }}>Tell the Vineyard community about yourself</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <Button variant="secondary" onClick={() => setPage('myprofile')}>
+          <Button variant="secondary" onClick={() => setPage('profile-me')}>
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave}>
