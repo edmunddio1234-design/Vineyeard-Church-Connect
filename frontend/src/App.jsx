@@ -66,8 +66,40 @@ function App() {
     }
   }, [user]);
 
+  // After login, fetch full profile from API so all fields are loaded
+  useEffect(() => {
+    if (user && !user._profileLoaded) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        api.getProfile()
+          .then((profile) => {
+            if (profile && profile.id) {
+              setUser((prev) => ({
+                ...prev,
+                ...normalizeMember(profile),
+                name: profile.name,
+                fullName: profile.name,
+                _profileLoaded: true,
+              }));
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [user]);
+
   if (!user) {
-    return <LoginPage onLogin={(u) => setUser(u)} />;
+    return (
+      <LoginPage
+        onLogin={(loginResult) => {
+          // Store token for API calls
+          if (loginResult.token) {
+            localStorage.setItem('token', loginResult.token);
+          }
+          setUser(loginResult.user || loginResult);
+        }}
+      />
+    );
   }
 
   const handleMsg = (m) => {
@@ -87,7 +119,7 @@ function App() {
         setPage={setPage}
         user={user}
         notifications={2}
-        onLogout={() => { setUser(null); setPage('home'); }}
+        onLogout={() => { localStorage.removeItem('token'); setUser(null); setPage('home'); }}
       />
       {page === 'home' && (
         <HomePage user={user} members={members} setPage={setPage} setSelMember={setSelMember} />

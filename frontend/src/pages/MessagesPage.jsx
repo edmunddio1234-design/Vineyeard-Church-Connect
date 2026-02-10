@@ -3,24 +3,12 @@ import { T } from '../theme';
 import { S } from '../styles';
 import { Avatar, Button, Input } from '../components/UI';
 import Icon from '../components/Icons';
+import { api } from '../api';
 
 export default function MessagesPage({ members, activeChat, setActiveChat }) {
-  const [convos, setConvos] = useState(() => {
-    const initial = {};
-    members.slice(0, 3).forEach((member) => {
-      initial[member.id] = [
-        {
-          id: 1,
-          text: 'Hi! Welcome to our community. Looking forward to connecting with you!',
-          sender: 'other',
-          time: '10:30 AM',
-        },
-      ];
-    });
-    return initial;
-  });
-
+  const [convos, setConvos] = useState({});
   const [msg, setMsg] = useState('');
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -31,12 +19,44 @@ export default function MessagesPage({ members, activeChat, setActiveChat }) {
     scrollToBottom();
   }, [convos, activeChat]);
 
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (activeChat && !convos[activeChat]) {
+      setLoading(true);
+      api.getMessages(activeChat)
+        .then((data) => {
+          const messages = Array.isArray(data) ? data : (data.messages || []);
+          setConvos((prev) => ({
+            ...prev,
+            [activeChat]: messages.map((msg) => ({
+              id: msg.id,
+              text: msg.text,
+              sender: msg.sender_type === 'user' ? 'user' : 'other',
+              time: msg.created_at
+                ? new Date(msg.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                : new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+            })),
+          }));
+        })
+        .catch((error) => {
+          console.error('Failed to load messages:', error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [activeChat, convos]);
+
   const handleSendMessage = () => {
     if (!msg.trim() || !activeChat) return;
 
+    const messageText = msg;
+    setMsg('');
+
+    // Add optimistic message to UI
     const newMessage = {
       id: (convos[activeChat]?.length || 0) + 1,
-      text: msg,
+      text: messageText,
       sender: 'user',
       time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
     };
@@ -46,21 +66,16 @@ export default function MessagesPage({ members, activeChat, setActiveChat }) {
       [activeChat]: [...(prev[activeChat] || []), newMessage],
     }));
 
-    setMsg('');
-
-    setTimeout(() => {
-      const replyMessage = {
-        id: (convos[activeChat]?.length || 0) + 2,
-        text: 'Thanks for reaching out! Looking forward to connecting at Vineyard soon. God bless!',
-        sender: 'other',
-        time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      };
-
-      setConvos((prev) => ({
-        ...prev,
-        [activeChat]: [...(prev[activeChat] || []), replyMessage],
-      }));
-    }, 1500);
+    // Send message via API
+    api.sendMessage(activeChat, messageText)
+      .then((response) => {
+        // Update with actual message from server if needed
+        console.log('Message sent successfully:', response);
+      })
+      .catch((error) => {
+        console.error('Failed to send message:', error);
+        // Optionally remove the optimistic message on error
+      });
   };
 
   const handleKeyPress = (e) => {

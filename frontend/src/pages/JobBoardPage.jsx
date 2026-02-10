@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { T } from '../theme';
 import { S } from '../styles';
 import { Button, Input, TextArea, Select, Avatar, Tag } from '../components/UI';
 import Icon from '../components/Icons';
 import { JOB_TYPES, JOB_CATS } from '../constants';
+import { api } from '../api';
 
 export default function JobBoardPage({ members }) {
   const [showForm, setShowForm] = useState(false);
@@ -22,128 +23,13 @@ export default function JobBoardPage({ members }) {
     description: '',
   });
 
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: 'Elementary Teacher',
-      company: 'Zachary Community Schools',
-      type: 'Full Time',
-      category: 'Education',
-      location: 'Zachary',
-      salary: '$42-55k',
-      description: 'We are seeking a dedicated elementary teacher for our school district.',
-      contactName: 'Sarah',
-      contactId: 'sarah-id',
-      urgent: false,
-      postedDate: '2024-01-15',
-      responses: 3,
-    },
-    {
-      id: 2,
-      title: 'Front Desk Receptionist',
-      company: 'Baton Rouge General',
-      type: 'Part Time',
-      category: 'Healthcare',
-      location: 'Downtown Baton Rouge',
-      salary: '$14-17/hr',
-      description: 'Friendly receptionist needed for our medical facility front desk.',
-      contactName: 'Jason',
-      contactId: 'jason-id',
-      urgent: false,
-      postedDate: '2024-01-14',
-      responses: 2,
-    },
-    {
-      id: 3,
-      title: 'Freelance Graphic Designer',
-      company: 'Creative Projects',
-      type: 'Freelance',
-      category: 'Arts & Entertainment',
-      location: 'Remote',
-      salary: 'Project-based',
-      description: 'Looking for talented graphic designer for various creative projects.',
-      contactName: 'Lisa',
-      contactId: 'lisa-id',
-      urgent: false,
-      postedDate: '2024-01-13',
-      responses: 1,
-    },
-    {
-      id: 4,
-      title: 'Youth Program Volunteer',
-      company: 'Vineyard Church',
-      type: 'Volunteer',
-      category: 'Non-Profit & Community Service',
-      location: 'Downtown Baton Rouge',
-      salary: 'Unpaid',
-      description: 'Help us lead and mentor youth in our community programs.',
-      contactName: 'Grace',
-      contactId: 'grace-id',
-      urgent: true,
-      postedDate: '2024-01-12',
-      responses: 5,
-    },
-    {
-      id: 5,
-      title: 'IT Support Technician',
-      company: 'CGI Federal',
-      type: 'Full Time',
-      category: 'Engineering & Technology',
-      location: 'Downtown Baton Rouge',
-      salary: '$45-60k',
-      description: 'IT support professional needed for tech support and troubleshooting.',
-      contactName: 'Marcus',
-      contactId: 'marcus-id',
-      urgent: false,
-      postedDate: '2024-01-11',
-      responses: 4,
-    },
-    {
-      id: 6,
-      title: 'Handyman',
-      company: 'Martinez Home Services',
-      type: 'Part Time',
-      category: 'Construction & Trades',
-      location: 'Prairieville',
-      salary: '$20-30/hr',
-      description: 'Experienced handyman needed for various home repair projects.',
-      contactName: 'David',
-      contactId: 'david-id',
-      urgent: true,
-      postedDate: '2024-01-10',
-      responses: 2,
-    },
-    {
-      id: 7,
-      title: 'Floral Designer Assistant',
-      company: 'Peregrin\'s',
-      type: 'Part Time',
-      category: 'Retail & Sales',
-      location: 'Downtown Baton Rouge',
-      salary: '$13-16/hr',
-      description: 'Assist our experienced floral designers in creating beautiful arrangements.',
-      contactName: 'Tom & Linda',
-      contactId: 'tom-linda-id',
-      urgent: false,
-      postedDate: '2024-01-09',
-      responses: 1,
-    },
-    {
-      id: 8,
-      title: 'Home Health Aide',
-      company: 'OLOL Home Health',
-      type: 'Full Time',
-      category: 'Healthcare',
-      location: 'Downtown Baton Rouge',
-      salary: '$28-35k',
-      description: 'Compassionate healthcare professional to provide home health services.',
-      contactName: 'Emily',
-      contactId: 'emily-id',
-      urgent: false,
-      postedDate: '2024-01-08',
-      responses: 3,
-    },
-  ]);
+  const [jobs, setJobs] = useState([]);
+
+  useEffect(() => {
+    api.getJobs().then(data => {
+      if (Array.isArray(data)) setJobs(data);
+    }).catch(() => {});
+  }, []);
 
   const typeColors = {
     'Full Time': '#374151',
@@ -165,26 +51,23 @@ export default function JobBoardPage({ members }) {
 
   const handleSubmit = () => {
     if (formData.title && formData.company && formData.type && formData.category) {
-      const newJob = {
-        id: jobs.length + 1,
+      const jobData = {
         ...formData,
-        contactName: members?.[0]?.name || 'Church Member',
-        contactId: members?.[0]?.id || 'member-id',
         urgent: false,
-        postedDate: new Date().toISOString().split('T')[0],
-        responses: 0,
       };
-      setJobs([newJob, ...jobs]);
-      setFormData({
-        title: '',
-        company: '',
-        type: '',
-        category: '',
-        location: '',
-        salary: '',
-        description: '',
-      });
-      setShowForm(false);
+      api.createJob(jobData).then(newJob => {
+        setJobs([newJob, ...jobs]);
+        setFormData({
+          title: '',
+          company: '',
+          type: '',
+          category: '',
+          location: '',
+          salary: '',
+          description: '',
+        });
+        setShowForm(false);
+      }).catch(() => {});
     }
   };
 

@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { T } from '../theme';
 import { S } from '../styles';
 import { Avatar, Button, Input, TextArea, Select } from '../components/UI';
 import { GALLERY_CATS } from '../constants';
+import { api } from '../api';
 
 export function GalleryPage({ members }) {
   const fileInputRef = useRef(null);
@@ -20,6 +21,12 @@ export function GalleryPage({ members }) {
   const [newCommentText, setNewCommentText] = useState({});
 
   const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    api.getGalleryPosts().then(data => {
+      if (Array.isArray(data)) setPosts(data);
+    }).catch(() => {});
+  }, []);
 
   const filteredPosts = selectedCategory === 'All'
     ? posts
@@ -46,28 +53,30 @@ export function GalleryPage({ members }) {
       alert('Please add a caption');
       return;
     }
-    const newPost = {
-      id: posts.length + 1,
-      author: 'You',
-      category: uploadData.category,
-      emoji: uploadData.imageData ? null : '✨',
-      imageData: uploadData.imageData || null,
+    const postData = {
       caption: uploadData.caption,
-      likes: 0,
+      category: uploadData.category,
+      media_type: uploadData.type,
+      media_url: uploadData.imageData || null,
       color: '#E5E7EB',
-      type: uploadData.type,
-      date: 'just now',
+      emoji: uploadData.imageData ? null : '✨',
     };
-    setPosts([newPost, ...posts]);
-    setUploadData({ caption: '', category: GALLERY_CATS[0], type: 'photo', imageData: null, imageName: '' });
-    setShowUploadForm(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    api.createGalleryPost(postData).then(newPost => {
+      setPosts([newPost, ...posts]);
+      setUploadData({ caption: '', category: GALLERY_CATS[0], type: 'photo', imageData: null, imageName: '' });
+      setShowUploadForm(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }).catch(() => {
+      alert('Failed to upload post. Please try again.');
+    });
   };
 
   const handleLike = (postId) => {
-    setPosts(posts.map(p =>
-      p.id === postId ? { ...p, likes: p.likes + 1 } : p
-    ));
+    api.likeGalleryPost(postId).then(() => {
+      setPosts(posts.map(p =>
+        p.id === postId ? { ...p, likes: p.likes + 1 } : p
+      ));
+    }).catch(() => {});
   };
 
   const handleAddComment = (postId) => {
@@ -294,8 +303,8 @@ export function GalleryPage({ members }) {
               <div
                 style={{
                   height: '220px',
-                  background: post.imageData
-                    ? `url(${post.imageData}) center/cover no-repeat`
+                  background: (post.imageData || post.media_url)
+                    ? `url(${post.imageData || post.media_url}) center/cover no-repeat`
                     : `linear-gradient(135deg, ${post.color}, ${post.color}cc)`,
                   display: 'flex',
                   alignItems: 'center',
@@ -304,10 +313,10 @@ export function GalleryPage({ members }) {
                   position: 'relative',
                 }}
               >
-                {!post.imageData && post.emoji}
+                {!(post.imageData || post.media_url) && post.emoji}
 
                 {/* Video Badge */}
-                {post.type === 'video' && (
+                {(post.type === 'video' || post.media_type === 'video') && (
                   <div
                     style={{
                       position: 'absolute',

@@ -32,25 +32,20 @@ export default function LoginPage({ onLogin }) {
         return;
       }
 
-      // Store token and call onLogin
-      localStorage.setItem('token', result.token);
-      const userData = {
-        id: result.id,
-        name: result.name || fullName,
-        email: result.email,
-      };
-      onLogin(userData);
+      // Store token and call onLogin with full result (App.jsx handles token + user)
+      onLogin(result);
     } catch (err) {
       // Fallback mock login for development
       console.warn('API failed, using mock login:', err);
       const mockToken = `mock-token-${Date.now()}`;
-      localStorage.setItem('token', mockToken);
-      const userData = {
-        id: `user-${Date.now()}`,
-        name: mode === 'login' ? email.split('@')[0] : fullName,
-        email: email,
-      };
-      onLogin(userData);
+      onLogin({
+        token: mockToken,
+        user: {
+          id: `user-${Date.now()}`,
+          name: mode === 'login' ? email.split('@')[0] : fullName,
+          email: email,
+        },
+      });
     }
   };
 

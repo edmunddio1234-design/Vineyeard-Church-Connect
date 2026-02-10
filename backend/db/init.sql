@@ -26,9 +26,18 @@ CREATE TABLE IF NOT EXISTS users (
   desired_groups TEXT[] DEFAULT '{}',
   hobbies TEXT[] DEFAULT '{}',
   available TEXT[] DEFAULT '{}',
+  need_help_with TEXT[] DEFAULT '{}',
   joined VARCHAR(10) DEFAULT '2026',
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Add need_help_with column if table already exists (safe migration)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'need_help_with') THEN
+    ALTER TABLE users ADD COLUMN need_help_with TEXT[] DEFAULT '{}';
+  END IF;
+END $$;
 
 -- Create connections table
 CREATE TABLE IF NOT EXISTS connections (

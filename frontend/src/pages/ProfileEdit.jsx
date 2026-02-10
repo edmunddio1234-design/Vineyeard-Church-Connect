@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { api } from '../api';
 import { T } from '../theme';
 import { S } from '../styles';
 import {
@@ -94,18 +95,67 @@ export default function ProfileEdit({ user, setUser, setPage }) {
     }
   };
 
-  const handleSave = () => {
-    // Merge form data back to user, keeping the original id/email/token
-    setUser((prev) => ({
-      ...prev,
-      ...form,
-      name: form.fullName, // Sync name field for navbar/avatar
-    }));
-    setShowSaved(true);
-    setTimeout(() => {
-      setShowSaved(false);
-      setPage('profile-me');
-    }, 1500);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Map frontend camelCase fields to backend snake_case for API
+      const payload = {
+        name: form.fullName,
+        phone: form.phone || null,
+        work: form.work || null,
+        location: form.location || null,
+        bio: form.bio || null,
+        social: form.socialInterests || null,
+        age: form.age ? parseInt(form.age) : null,
+        has_kids: form.kids ? parseInt(form.kids) : 0,
+        is_retired: form.retired === 'Yes',
+        marital_status: form.maritalStatus || null,
+        birthday: form.birthday || null,
+        languages: form.languages.length > 0 ? form.languages : null,
+        can_drive: form.canDrive === 'Yes',
+        dietary: form.dietary || null,
+        spiritual_gifts: form.spiritualGifts.length > 0 ? form.spiritualGifts : null,
+        current_groups: form.smallGroups.length > 0 ? form.smallGroups : null,
+        desired_groups: form.desiredGroups.length > 0 ? form.desiredGroups : null,
+        hobbies: form.hobbies.length > 0 ? form.hobbies : null,
+        available: form.availableToHelp.length > 0 ? form.availableToHelp : null,
+        need_help_with: form.needHelpWith.length > 0 ? form.needHelpWith : null,
+        profile_image: form.profilePhoto || null,
+      };
+
+      const result = await api.updateProfile(payload);
+
+      // Update local user state with the API response
+      setUser((prev) => ({
+        ...prev,
+        ...result,
+        fullName: result.name,
+        name: result.name,
+      }));
+
+      setShowSaved(true);
+      setTimeout(() => {
+        setShowSaved(false);
+        setPage('profile-me');
+      }, 1500);
+    } catch (err) {
+      console.error('Save profile error:', err);
+      // Still update local state as fallback
+      setUser((prev) => ({
+        ...prev,
+        ...form,
+        name: form.fullName,
+      }));
+      setShowSaved(true);
+      setTimeout(() => {
+        setShowSaved(false);
+        setPage('profile-me');
+      }, 1500);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getInitials = (name) => {

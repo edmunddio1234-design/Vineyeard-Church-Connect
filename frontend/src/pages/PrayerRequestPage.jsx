@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { T } from '../theme';
 import { S } from '../styles';
+import { api } from '../api';
 import { Button, Input, TextArea, Select, Avatar } from '../components/UI';
 import Icon from '../components/Icons';
 import { PRAYER_CATS } from '../constants';
@@ -10,7 +11,6 @@ export default function PrayerRequestPage({ members }) {
   const [filterCategory, setFilterCategory] = useState('');
   const [expandedResponses, setExpandedResponses] = useState(new Set());
   const [markedAnswered, setMarkedAnswered] = useState(new Set());
-  const [prayingCount, setPrayingCount] = useState({});
 
   const [formData, setFormData] = useState({
     title: '',
@@ -37,140 +37,15 @@ export default function PrayerRequestPage({ members }) {
     'Global': '🌍',
   };
 
-  const [prayers, setPrayers] = useState([
-    {
-      id: 1,
-      title: 'Wisdom for schooling decisions',
-      details: 'We are trying to decide on the best educational path for our child. Would appreciate prayers for wisdom and guidance.',
-      category: 'Family',
-      author: 'Sarah',
-      authorId: 'sarah-id',
-      anonymous: false,
-      postedDate: '2024-01-10',
-      prayingCount: 14,
-      answered: false,
-      responses: [
-        { id: 1, text: 'Praying for God\'s guidance in your decision.' },
-        { id: 2, text: 'May the Holy Spirit give you clear direction.' },
-      ],
-    },
-    {
-      id: 2,
-      title: 'Upcoming surgery',
-      details: 'I have surgery coming up next week and would appreciate prayer for the surgery team, the procedure, and a smooth recovery.',
-      category: 'Health',
-      author: 'Anonymous',
-      authorId: 'anon-2',
-      anonymous: true,
-      postedDate: '2024-01-08',
-      prayingCount: 22,
-      answered: false,
-      responses: [
-        { id: 1, text: 'Lifting you up in prayer. Trust in the Lord.' },
-        { id: 2, text: 'God is with you through this. Be strong and courageous.' },
-        { id: 3, text: 'Praying for excellent medical care and swift healing.' },
-      ],
-    },
-    {
-      id: 3,
-      title: 'Loss of my sister',
-      details: 'My sister passed away last month. We are still grieving as a family. Prayers for comfort and strength during this difficult time.',
-      category: 'Grief & Loss',
-      author: 'Grace',
-      authorId: 'grace-id',
-      anonymous: false,
-      postedDate: '2024-01-05',
-      prayingCount: 31,
-      answered: false,
-      responses: [
-        { id: 1, text: 'So sorry for your loss. Praying for your family.' },
-        { id: 2, text: 'May you feel God\'s presence and comfort.' },
-        { id: 3, text: 'Sending love and prayers during this time.' },
-        { id: 4, text: 'Your sister is in heaven with Jesus. Rest in that hope.' },
-      ],
-    },
-    {
-      id: 4,
-      title: 'Job interview this Friday',
-      details: 'I have an important job interview coming up this Friday. Praying for confidence, clarity, and God\'s will in this opportunity.',
-      category: 'Work',
-      author: 'Marcus',
-      authorId: 'marcus-id',
-      anonymous: false,
-      postedDate: '2024-01-03',
-      prayingCount: 9,
-      answered: true,
-      responses: [
-        { id: 1, text: 'Praying for a great interview! God\'s got this.' },
-      ],
-    },
-    {
-      id: 5,
-      title: 'Restoration of friendship',
-      details: 'A close friendship has been strained. We need prayers for healing, reconciliation, and restoration of our relationship.',
-      category: 'Relationship',
-      author: 'Anonymous',
-      authorId: 'anon-5',
-      anonymous: true,
-      postedDate: '2024-01-02',
-      prayingCount: 17,
-      answered: false,
-      responses: [
-        { id: 1, text: 'Praying for restoration and healing between you both.' },
-        { id: 2, text: 'May God\'s love bring you back together.' },
-      ],
-    },
-    {
-      id: 6,
-      title: 'Grateful for church family!',
-      details: 'I am so thankful for this church and the incredible family we have here. Praising God for the blessing of community, love, and support.',
-      category: 'Praise & Thanksgiving',
-      author: 'Tom & Linda',
-      authorId: 'tom-linda-id',
-      anonymous: false,
-      postedDate: '2024-01-01',
-      prayingCount: 25,
-      answered: false,
-      responses: [
-        { id: 1, text: 'What a blessing! Praise God for His faithfulness!' },
-        { id: 2, text: 'Amen! We are blessed to have you in our church family.' },
-        { id: 3, text: 'Thank you for your servant hearts and love.' },
-      ],
-    },
-    {
-      id: 7,
-      title: 'Discipline in daily devotions',
-      details: 'I want to grow closer to God but struggle with consistency in my daily quiet time and devotions. Prayers for discipline and dedication.',
-      category: 'Spiritual',
-      author: 'Jason',
-      authorId: 'jason-id',
-      anonymous: false,
-      postedDate: '2023-12-30',
-      prayingCount: 12,
-      answered: false,
-      responses: [
-        { id: 1, text: 'Praying for a heart that hungers for God\'s Word.' },
-        { id: 2, text: 'May the Holy Spirit strengthen your commitment.' },
-      ],
-    },
-    {
-      id: 8,
-      title: 'Baby on the way!',
-      details: 'We are expecting! Prayers for a healthy pregnancy, smooth delivery, and a beautiful new life to join our family.',
-      category: 'Health',
-      author: 'Emily',
-      authorId: 'emily-id',
-      anonymous: false,
-      postedDate: '2023-12-28',
-      prayingCount: 28,
-      answered: false,
-      responses: [
-        { id: 1, text: 'Congratulations! What wonderful news! Praying for a healthy baby and mom.' },
-        { id: 2, text: 'So excited for your family! Blessings on this journey.' },
-        { id: 3, text: 'May God grant you perfect health and joy in this season.' },
-      ],
-    },
-  ]);
+  const [prayers, setPrayers] = useState([]);
+
+  useEffect(() => {
+    api.getPrayers().then(data => {
+      if (Array.isArray(data)) {
+        setPrayers(data);
+      }
+    }).catch(() => {});
+  }, []);
 
   const handleFormChange = (e) => {
     const { name, value, checked, type } = e.target;
@@ -182,20 +57,17 @@ export default function PrayerRequestPage({ members }) {
 
   const handleSubmit = () => {
     if (formData.title && formData.category) {
-      const newPrayer = {
-        id: prayers.length + 1,
+      api.createPrayer({
         title: formData.title,
-        details: formData.details,
+        description: formData.details,
         category: formData.category,
-        author: formData.anonymous ? 'Anonymous' : (members?.[0]?.name || 'Church Member'),
-        authorId: formData.anonymous ? `anon-${prayers.length + 1}` : (members?.[0]?.id || 'member-id'),
         anonymous: formData.anonymous,
-        postedDate: new Date().toISOString().split('T')[0],
-        prayingCount: 0,
-        answered: false,
-        responses: [],
-      };
-      setPrayers([newPrayer, ...prayers]);
+      }).then(newPrayer => {
+        if (newPrayer) {
+          setPrayers([newPrayer, ...prayers]);
+        }
+      }).catch(() => {});
+
       setFormData({
         title: '',
         details: '',
@@ -231,10 +103,11 @@ export default function PrayerRequestPage({ members }) {
   };
 
   const togglePraying = (prayerId) => {
-    setPrayingCount(prev => ({
-      ...prev,
-      [prayerId]: (prev[prayerId] || 0) + 1,
-    }));
+    api.prayForRequest(prayerId).then(() => {
+      setPrayers(prayers.map(p =>
+        p.id === prayerId ? { ...p, prayingCount: (p.prayingCount || 0) + 1 } : p
+      ));
+    }).catch(() => {});
   };
 
   return (
@@ -469,7 +342,7 @@ export default function PrayerRequestPage({ members }) {
                   border: 'none',
                 }}
               >
-                🙏 Praying ({prayer.prayingCount + (prayingCount[prayer.id] || 0)})
+                🙏 Praying ({prayer.prayingCount || 0})
               </Button>
               <Button
                 size="sm"

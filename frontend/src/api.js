@@ -55,7 +55,7 @@ export const api = {
     }).then((r) => r.json()),
 
   getMessages: (userId) =>
-    fetch(`${API_URL}/api/messages/${userId}`, {
+    fetch(`${API_URL}/api/messages/conversation/${userId}`, {
       headers: getHeaders(),
     }).then((r) => r.json()),
 

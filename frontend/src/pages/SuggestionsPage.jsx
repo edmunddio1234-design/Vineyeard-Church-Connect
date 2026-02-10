@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { T } from '../theme';
 import { S } from '../styles';
 import { Avatar, Button, Input, TextArea, Select } from '../components/UI';
+import { api } from '../api';
 
 export function SuggestionsPage({ members }) {
   const [showForm, setShowForm] = useState(false);
@@ -35,6 +36,13 @@ export function SuggestionsPage({ members }) {
 
   const [suggestions, setSuggestions] = useState([]);
 
+  // Load suggestions from API on mount
+  useEffect(() => {
+    api.getSuggestions().then(data => {
+      if (Array.isArray(data)) setSuggestions(data);
+    }).catch(() => {});
+  }, []);
+
   // Filter and sort suggestions
   let displayedSuggestions = filterCategory
     ? suggestions.filter(s => s.category === filterCategory)
@@ -51,25 +59,27 @@ export function SuggestionsPage({ members }) {
       alert('Please fill in all fields');
       return;
     }
-    const newSuggestion = {
-      id: suggestions.length + 1,
+    api.createSuggestion({
+      category: formData.category,
       title: formData.title,
       description: formData.description,
-      category: formData.category,
-      votes: 0,
-      author: 'You',
-      date: 'just now',
-      comments: 0,
-    };
-    setSuggestions([newSuggestion, ...suggestions]);
-    setFormData({ title: '', description: '', category: 'Event' });
-    setShowForm(false);
+    }).then(newSuggestion => {
+      setSuggestions([newSuggestion, ...suggestions]);
+      setFormData({ title: '', description: '', category: 'Event' });
+      setShowForm(false);
+    }).catch(() => {
+      alert('Failed to submit suggestion');
+    });
   };
 
   const handleVote = (suggestionId) => {
-    setSuggestions(suggestions.map(s =>
-      s.id === suggestionId ? { ...s, votes: s.votes + 1 } : s
-    ));
+    api.voteSuggestion(suggestionId).then(() => {
+      setSuggestions(suggestions.map(s =>
+        s.id === suggestionId ? { ...s, votes: s.votes + 1 } : s
+      ));
+    }).catch(() => {
+      alert('Failed to vote on suggestion');
+    });
   };
 
   return (
