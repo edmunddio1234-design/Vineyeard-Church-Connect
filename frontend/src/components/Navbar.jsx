@@ -9,13 +9,13 @@ export default function Navbar({ page, setPage, user, notifications = [], onLogo
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home' },
     { id: 'directory', label: 'Members', icon: 'users' },
+    { id: 'tree', label: 'My Network', icon: 'family' },
     { id: 'messages', label: 'Messages', icon: 'chat' },
-    { id: 'connections', label: 'Connections', icon: 'handshake' },
+    { id: 'connections', label: 'Help Board', icon: 'handshake' },
     { id: 'jobs', label: 'Jobs', icon: 'briefcase' },
     { id: 'prayer', label: 'Prayer', icon: 'pray' },
     { id: 'gallery', label: 'Gallery', icon: 'image' },
     { id: 'suggestions', label: 'Ideas', icon: 'megaphone' },
-    { id: 'tree', label: 'Network', icon: 'family' },
   ];
 
   const notificationCount = Array.isArray(notifications) ? notifications.length : 0;

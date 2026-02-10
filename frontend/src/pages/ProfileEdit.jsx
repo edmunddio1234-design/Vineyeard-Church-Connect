@@ -17,6 +17,7 @@ import {
   SPIRITUAL_GIFTS,
   HOBBY_OPTS,
   AVAIL_OPTS,
+  NEED_HELP_OPTS,
 } from '../constants';
 
 export default function ProfileEdit({ user, setUser, setPage }) {
@@ -47,6 +48,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
     spiritualGifts: safeArr(user.spiritualGifts || user.spiritual_gifts),
     hobbies: safeArr(user.hobbies),
     availableToHelp: safeArr(user.availableToHelp || user.available),
+    needHelpWith: safeArr(user.needHelpWith || user.need_help_with),
     profilePhoto: user.profilePhoto || user.profile_image || null,
   });
 
@@ -381,6 +383,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
       {/* SECTION 4: Current Small Groups */}
       <div style={{ ...S.card, marginTop: '20px' }}>
         <h2 style={S.h2}>Current Small Groups</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — tap to toggle</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
           {SMALL_GROUPS.map((group) => (
             <button
@@ -411,6 +414,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
       {/* SECTION 5: Groups I'd Like to Join */}
       <div style={{ ...S.card, marginTop: '20px' }}>
         <h2 style={S.h2}>Groups I'd Like to Join</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — tap to toggle</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
           {DESIRED_GROUPS.map((group) => (
             <button
@@ -441,6 +445,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
       {/* SECTION 6: Spiritual Gifts */}
       <div style={{ ...S.card, marginTop: '20px' }}>
         <h2 style={S.h2}>Spiritual Gifts</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — tap to toggle</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
           {SPIRITUAL_GIFTS.map((gift) => (
             <button
@@ -471,6 +476,7 @@ export default function ProfileEdit({ user, setUser, setPage }) {
       {/* SECTION 7: My Hobbies */}
       <div style={{ ...S.card, marginTop: '20px' }}>
         <h2 style={S.h2}>My Hobbies</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — tap to toggle</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
           {HOBBY_OPTS.map((hobby) => (
             <button
@@ -498,9 +504,10 @@ export default function ProfileEdit({ user, setUser, setPage }) {
         </div>
       </div>
 
-      {/* SECTION 8: Available to Help */}
-      <div style={{ ...S.card, marginTop: '20px', marginBottom: '20px' }}>
-        <h2 style={S.h2}>Available to Help</h2>
+      {/* SECTION 8: I'm Willing to Help With */}
+      <div style={{ ...S.card, marginTop: '20px' }}>
+        <h2 style={S.h2}>I'm Willing to Help With</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — let others know how you can serve</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
           {AVAIL_OPTS.map((opt) => (
             <button
@@ -513,6 +520,37 @@ export default function ProfileEdit({ user, setUser, setPage }) {
                   form.availableToHelp.includes(opt) ? T.primary : T.border
                 }`,
                 backgroundColor: form.availableToHelp.includes(opt)
+                  ? T.primaryFaint
+                  : 'transparent',
+                color: T.text,
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+              }}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION 9: I'm Looking for Help */}
+      <div style={{ ...S.card, marginTop: '20px', marginBottom: '20px' }}>
+        <h2 style={S.h2}>I'm Looking for Help With</h2>
+        <p style={{ fontSize: '13px', color: T.textMuted, marginTop: '4px' }}>Select all that apply — let others know what you need</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px' }}>
+          {NEED_HELP_OPTS.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => toggleArrayField('needHelpWith', opt)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: `2px solid ${
+                  form.needHelpWith.includes(opt) ? T.primary : T.border
+                }`,
+                backgroundColor: form.needHelpWith.includes(opt)
                   ? T.primaryFaint
                   : 'transparent',
                 color: T.text,

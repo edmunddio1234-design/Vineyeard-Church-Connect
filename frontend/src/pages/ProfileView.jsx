@@ -18,6 +18,7 @@ export default function ProfileView({ member, setPage, onMessage }) {
 
   const isRetired = member.retired === 'Yes';
   const hasAvailability = member.availableToHelp && member.availableToHelp.length > 0;
+  const hasNeeds = member.needHelpWith && member.needHelpWith.length > 0;
   const hasSpiritual = member.spiritualGifts && member.spiritualGifts.length > 0;
   const hasSmallGroups = member.smallGroups && member.smallGroups.length > 0;
   const hasInterested = member.desiredGroups && member.desiredGroups.length > 0;
@@ -202,6 +203,28 @@ export default function ProfileView({ member, setPage, onMessage }) {
                 {member.availableToHelp.map((item) => (
                   <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Icon name="check" size={18} color={T.success} />
+                    <span style={{ color: T.text }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Looking for Help */}
+          {hasNeeds && (
+            <div
+              style={{
+                ...S.card,
+                backgroundColor: '#FEF3C7',
+                borderWidth: '2px',
+                borderColor: '#F59E0B',
+              }}
+            >
+              <h3 style={S.h3}>Looking for Help With</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {member.needHelpWith.map((item) => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Icon name="heart" size={18} color="#F59E0B" />
                     <span style={{ color: T.text }}>{item}</span>
                   </div>
                 ))}

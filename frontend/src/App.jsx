@@ -35,6 +35,7 @@ const normalizeMember = (m) => {
     hobbies: ensureArray(m.hobbies),
     available: ensureArray(m.available),
     availableToHelp: ensureArray(m.available || m.availableToHelp),
+    needHelpWith: ensureArray(m.need_help_with || m.needHelpWith),
     languages: ensureArray(m.languages),
     canDrive: m.can_drive ?? m.canDrive ?? true,
     joined: m.joined || '2026',

@@ -65,6 +65,13 @@ export const PRAYER_CATS = [
   "Financial", "Grief & Loss", "Thanksgiving", "Other",
 ];
 
+export const NEED_HELP_OPTS = [
+  "Childcare", "Rides / Transportation", "Meals / Groceries", "Moving Help",
+  "Home Repairs", "Financial Advice", "Prayer Support", "Hospital Visits",
+  "Emotional Support", "Job Search Help", "Tech Help", "Yard Work",
+  "Tutoring / Homework Help", "Elder Care", "Pet Sitting",
+];
+
 export const GALLERY_CATS = [
   "Church Events", "Small Groups", "Community Service", "Worship",
   "Social", "Youth", "Nature", "Family",

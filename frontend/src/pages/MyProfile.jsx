@@ -12,11 +12,13 @@ export default function MyProfile({ user, setPage }) {
     smallGroups: user.smallGroups || user.currentGroups || [],
     hobbies: user.hobbies || [],
     availableToHelp: user.availableToHelp || user.available || [],
+    needHelpWith: user.needHelpWith || user.need_help_with || [],
   };
   const isEmpty = !u.bio || u.bio.trim() === '';
   const hasSmallGroups = u.smallGroups && u.smallGroups.length > 0;
   const hasHobbies = u.hobbies && u.hobbies.length > 0;
   const hasAvailability = u.availableToHelp && u.availableToHelp.length > 0;
+  const hasNeeds = u.needHelpWith && u.needHelpWith.length > 0;
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -138,7 +140,7 @@ export default function MyProfile({ user, setPage }) {
                 borderWidth: '2px',
               }}
             >
-              <h3 style={S.h3}>I Can Help With</h3>
+              <h3 style={S.h3}>I'm Willing to Help With</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {u.availableToHelp.map((item) => (
                   <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -149,11 +151,33 @@ export default function MyProfile({ user, setPage }) {
               </div>
             </div>
           )}
+
+          {/* I Need Help With */}
+          {hasNeeds && (
+            <div
+              style={{
+                ...S.card,
+                backgroundColor: '#FEF3C7',
+                borderWidth: '2px',
+                borderColor: '#F59E0B',
+              }}
+            >
+              <h3 style={S.h3}>I'm Looking for Help With</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {u.needHelpWith.map((item) => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Icon name="heart" size={18} color="#F59E0B" />
+                    <span style={{ color: T.text }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Empty Profile Prompt */}
-      {isEmpty && !hasSmallGroups && !hasHobbies && !hasAvailability && (
+      {isEmpty && !hasSmallGroups && !hasHobbies && !hasAvailability && !hasNeeds && (
         <div
           style={{
             ...S.card,
