@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { T } from './theme';
 import { MEMBERS } from './constants';
+import { api } from './api';
 import LoginPage from './components/LoginPage';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
@@ -21,6 +22,22 @@ function App() {
   const [page, setPage] = useState('home');
   const [selMember, setSelMember] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
+  const [members, setMembers] = useState(MEMBERS);
+
+  // Fetch real members from API when user is logged in
+  useEffect(() => {
+    if (user) {
+      api.getMembers()
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setMembers(data);
+          }
+        })
+        .catch(() => {
+          // Fall back to mock data silently
+        });
+    }
+  }, [user]);
 
   if (!user) {
     return <LoginPage onLogin={(u) => setUser(u)} />;
@@ -46,10 +63,10 @@ function App() {
         onLogout={() => { setUser(null); setPage('home'); }}
       />
       {page === 'home' && (
-        <HomePage user={user} members={MEMBERS} setPage={setPage} setSelMember={setSelMember} />
+        <HomePage user={user} members={members} setPage={setPage} setSelMember={setSelMember} />
       )}
       {page === 'directory' && (
-        <DirectoryPage members={MEMBERS} setPage={setPage} setSelMember={setSelMember} />
+        <DirectoryPage members={members} setPage={setPage} setSelMember={setSelMember} />
       )}
       {page === 'profile-view' && (
         <ProfileView member={selMember} setPage={setPage} onMessage={handleMsg} />
@@ -61,25 +78,25 @@ function App() {
         <ProfileEdit user={user} setUser={setUser} setPage={setPage} />
       )}
       {page === 'messages' && (
-        <MessagesPage members={MEMBERS} activeChat={activeChat} setActiveChat={setActiveChat} />
+        <MessagesPage members={members} activeChat={activeChat} setActiveChat={setActiveChat} />
       )}
       {page === 'connections' && (
-        <ConnectionsPage members={MEMBERS} />
+        <ConnectionsPage members={members} />
       )}
       {page === 'jobs' && (
-        <JobBoardPage members={MEMBERS} />
+        <JobBoardPage members={members} />
       )}
       {page === 'prayer' && (
-        <PrayerRequestPage members={MEMBERS} />
+        <PrayerRequestPage members={members} />
       )}
       {page === 'gallery' && (
-        <GalleryPage members={MEMBERS} />
+        <GalleryPage members={members} />
       )}
       {page === 'suggestions' && (
-        <SuggestionsPage members={MEMBERS} />
+        <SuggestionsPage members={members} />
       )}
       {page === 'tree' && (
-        <ConnectionTree members={MEMBERS} />
+        <ConnectionTree members={members} />
       )}
     </div>
   );
