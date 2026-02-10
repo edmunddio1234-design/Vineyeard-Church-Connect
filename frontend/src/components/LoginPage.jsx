@@ -76,7 +76,7 @@ export default function LoginPage({ onLogin }) {
         {/* Logo Section */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ marginBottom: '24px' }}>
-            <VineyardLogo size={100} />
+            <VineyardLogo size={100} hideText />
           </div>
 
           {/* Vineyard Text */}
